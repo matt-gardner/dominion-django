@@ -16,6 +16,7 @@ def socketio(request):
         socketio.broadcast({'announcement':
                 socketio.session.session_id + ' connected'})
 
+    game_id = None
     while True:
         message = socketio.recv()
 
@@ -27,12 +28,20 @@ def socketio(request):
             message = message[0]
         else:
             print "Message wasn't a list of 1 item...  Not sure what to do"
-        print message
         if 'game' in message:
-            game = Game.objects.get(pk=message['game'])
+            game_id = message['game']
             player = message['player']
+            game = Game.objects.get(pk=game_id)
             socketio.send({'count': game.count})
         elif 'val' in message:
+            if not game_id:
+                print 'Something bad happened... game_id is not initialized'
+            # We need to re-query for the game object every time so that all of
+            # its fields are up to date; otherwise we would only have stale
+            # information in game.  This assumes that these messages are
+            # reasonably far apart, so that we don't get race conditions.  But
+            # that should be fine for the applications I'm considering.
+            game = Game.objects.get(pk=game_id)
             game.count += 1
             game.save()
             print game.count, game.pk
