@@ -1,0 +1,16 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>{% block title %}{{ title|default:"Dominion" }}{% endblock %}</title>
+<link rel="stylesheet" title="default" href="/media/style.css" type="text/css" />
+</head>
+
+<body>
+
+{% block content %}
+{{ content }}
+{% endblock %}
+
+</body>
+</html>

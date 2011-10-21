@@ -1,0 +1,16 @@
+{% extends "basetemplate.html" %}
+
+{% block title %} Dominion - Pick a Game {% endblock %}
+
+{% block content %}
+
+Pick a game to play:
+
+<ul>
+{% for game in games %}
+<li><a href="game/{{ game.id }}">{{ game.name }}</a></li>
+{% endfor %}
+<li><a href="new-game/">New Game</a></li>
+</ul>
+
+{% endblock %}
