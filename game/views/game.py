@@ -12,7 +12,7 @@ def main(request):
 
 
 def new_game(request):
-    game = Game(num_players=4)
+    game = Game(num_players=2)
     game.save()
     game.name = 'Game %d' % game.id
     game.save()

@@ -10,13 +10,28 @@
 
     <script>
       function message(obj){
+        if (!obj) {
+            // Not sure why this happens sometimes, but it does.
+            return;
+        }
         if ('count' in obj) {
             document.getElementById('main').innerHTML = obj.count;
+            document.getElementById('form').style.display='block';
         }
         if ('announcement' in obj) {
             var el = document.createElement('p');
             el.innerHTML = '<em>' + esc(obj.announcement) + '</em>';
             document.getElementById('main').appendChild(el);
+        }
+        if ('available' in obj) {
+            var i = 0;
+            for (i = 0; i < obj.available.length; i++) {
+                var el = document.createElement('p');
+                el.innerHTML = '<button onclick="player('+obj.available[i]+
+                    ')">';
+                el.innerHTML += esc(obj.available[i]) + '</button>';
+                document.getElementById('main').appendChild(el);
+            }
         }
       }
 
@@ -24,7 +39,10 @@
         var count = parseInt(document.getElementById('main').innerHTML);
         var val = 1;
         socket.send({'val': val});
-        message({ count: count + val});
+      }
+
+      function player(num){
+        socket.send({'player': num});
       }
 
       function esc(msg){
@@ -34,15 +52,10 @@
       var socket = new io.Socket(null, {port: {{ request.environ.SERVER_PORT|default:"9000" }}, rememberTransport: false});
       socket.connect();
       socket.on('connect', function(obj) {
-        socket.send({'game': {{ game }}, 'player': 1});
+        socket.send({'game': {{ game }}});
       });
       socket.on('message', function(obj){
-        if ('count' in obj){
-          document.getElementById('form').style.display='block';
-          document.getElementById('main').innerHTML = obj.count;
-
-          for (var i in obj.buffer) message(obj.buffer[i]);
-        } else message(obj);
+          message(obj);
       });
     </script>
 
