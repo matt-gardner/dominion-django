@@ -5,11 +5,17 @@ import traceback
 from django.core.signals import got_request_exception
 from dominion.game.models import Game
 
+# This is so that exceptions are actually printed on the command line instead
+# of just being swallowed up.  If you don't have these few lines, you can't
+# really debug any of the socketio stuff.
 def exception_printer(sender, **kwargs):
     print >> sys.stderr, ''.join(traceback.format_exception(*sys.exc_info()))
 
 got_request_exception.connect(exception_printer)
 
+# I think the strategy here should be that this just calls methods in game
+# logic code depending on what messages it receives.  In the typically
+# model-view-controller framework, this little piece of code is the controller.
 def socketio(request):
     socketio = request.environ['socketio']
     if socketio.on_connect():
