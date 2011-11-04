@@ -47,7 +47,8 @@ class Player(models.Model):
     TURN_STATES = (
             (u'NOTYOURTURN', u'Not your turn'),
             (u'ACTIONS', u'Play actions'),
-            (u'BUY', u'Buy cards')
+            (u'BUY', u'Buy cards'),
+            (u'WAITING', u'Waiting for others to respond to your action'),
             )
     game = models.ForeignKey('Game')
     name = models.CharField(max_length=64)
@@ -58,13 +59,34 @@ class Player(models.Model):
     num_actions = models.IntegerField(default=1)
     num_buys = models.IntegerField(default=1)
     coins = models.IntegerField(default=0)
+    waiting_for = models.TextField() # this is a JSON encoded string
 
     def begin_turn(self):
-        self.turn_state = TURN_STATES[1]
+        # We don't reset coins here, because that's easiest to take care of
+        # when we draw cards, which we do at the end of the turn.
+        self.turn_state = TURN_STATES[1][0]
         self.num_actions = 1
         self.num_buys = 1
-        self.coins = self.get_coin_count()
         self.save()
+
+    def get_card_from_hand(self, card_num):
+        hand = self.deck.cards_in_hand.split()
+        if card_num not in hand:
+            raise IllegalActionError("Cannot get card that isn't in hand")
+        card = get_card_from_name(
+                self.deck.cards.get(card_num=card_num).cardname)
+        return card
+
+    def draw_card(self):
+        card = self.deck.draw_card_to_hand()
+        self.coins += card.coins()
+        self.save()
+
+    def discard_card(self, card_num):
+        card = self.get_card_from_hand(card_num)
+        self.coins -= card.coins()
+        self.save()
+        self.deck.discard_card_from_hand(card_num)
 
     def play_action(self, card_num):
         if self.turn_state == TURN_STATES[0][0]:
@@ -72,11 +94,9 @@ class Player(models.Model):
         elif self.turn_state == TURN_STATES[2][0]:
             raise IllegalActionError("You're in a buy state, you can't play "
             "actions")
-        hand = self.deck.cards_in_hand.split()
-        if card_num not in hand:
-            raise IllegalActionError("Cannot play card that isn't in hand")
-        card = get_card_from_name(
-                self.deck.cards.get(card_num=card_num).cardname)
+        elif self.turn_state == TURN_STATES[3][0]:
+            raise IllegalActionError("You need to wait for others to finish")
+        card = self.get_card_from_hand(card_num)
         # This method has the responsibility to change the state of the player
         # object, and to do whatever it needs to with other players.  It does
         # not necessarily need to save the player, as we do that here.
@@ -103,19 +123,12 @@ class Player(models.Model):
         cardstack.save()
         self.deck.add_card(cardname)
 
-    def get_coin_count(self):
-        hand = self.deck.get_cards_in_hand()
-        coins = 0
-        for card in hand:
-            coins += card.coins()
-        return coins
-
     def end_turn(self):
         self.deck.discard_cards_in_hand()
         self.deck.discard_cards_in_play()
         self.deck.discard_active_cards_in_play()
         for i in range(5):
-            self.deck.draw_card_to_hand()
+            self.draw_card()
         self.turn_state = TURN_STATES[0][0]
         self.save()
 
@@ -182,29 +195,31 @@ class Deck(models.Model):
         if not deck:
             self.shuffle()
             deck = self.cards_in_deck.split()
-        hand.append(deck[0])
+        card = deck[0]
         deck = deck[1:]
+        hand.append(card)
         self.cards_in_hand = ' '.join(hand)
         self.cards_in_deck = ' '.join(deck)
         self.save()
+        return card
 
     def draw_card_to_play(self):
         """Takes the top card off of the deck and puts it into cards_in_play.
 
         If necessary, this shuffles the deck.
-
-        We also return the card from this method for easy access by the caller.
         """
         play = self.cards_in_play.split()
         deck = self.cards_in_deck.split()
         if not deck:
             self.shuffle()
             deck = self.cards_in_deck.split()
-        play.append(deck[0])
+        card = deck[0]
         deck = deck[1:]
+        play.append(card)
         self.cards_in_play = ' '.join(play)
         self.cards_in_deck = ' '.join(deck)
         self.save()
+        return card
 
     def discard_cards_in_play(self):
         """Called at the end of turn.  Moves cards from play to discard."""
@@ -230,6 +245,15 @@ class Deck(models.Model):
         discard = self.cards_in_discard.split()
         discard.extend(hand)
         self.cards_in_hand = ''
+        self.cards_in_discard = ' '.join(discard)
+        self.save()
+
+    def discard_card_from_hand(self, card_num):
+        hand = self.cards_in_hand.split()
+        discard = self.cards_in_discard.split()
+        hand.remove(card_num)
+        discard.append(card_num)
+        self.cards_in_hand = ' '.join(hand)
         self.cards_in_discard = ' '.join(discard)
         self.save()
 
