@@ -39,8 +39,8 @@ class CardSet(models.Model):
 class CardStack(models.Model):
     cardset = models.ForeignKey('CardSet')
     cardname = models.CharField(max_length=64)
-    num_cards = models.IntegerField(defualt=10)
-    num_left = models.IntegerField(defualt=10)
+    num_cards = models.IntegerField(default=10)
+    num_left = models.IntegerField(default=10)
 
 
 class Player(models.Model):
@@ -88,7 +88,7 @@ class Player(models.Model):
         self.save()
         self.deck.discard_card_from_hand(card_num)
 
-    def play_action(self, card_num):
+    def play_action(self, card_num, socket):
         if self.turn_state == TURN_STATES[0][0]:
             raise IllegalActionError("It's not your turn!")
         elif self.turn_state == TURN_STATES[2][0]:
@@ -100,7 +100,7 @@ class Player(models.Model):
         # This method has the responsibility to change the state of the player
         # object, and to do whatever it needs to with other players.  It does
         # not necessarily need to save the player, as we do that here.
-        card.play_action(self)
+        card.play_action(self, socket)
         self.num_actions -= 1
         if self.num_actions == 0:
             self.turn_state = TURN_STATES[2][0]
@@ -145,6 +145,15 @@ class Deck(models.Model):
     cards_in_play = models.CharField(max_length=512)
     active_cards_in_play = models.CharField(max_length=512)
     last_card_num = models.IntegerField(default=0)
+
+    def get_num_cards(self):
+        num_cards = 0
+        num_cards += len(self.cards_in_hand.split())
+        num_cards += len(self.cards_in_deck.split())
+        num_cards += len(self.cards_in_discard.split())
+        num_cards += len(self.cards_in_play.split())
+        num_cards += len(self.active_cards_in_play.split())
+        return num_cards
 
     def add_card(self, cardname):
         card = CardInDeck(deck=self, cardname=cardname,
@@ -266,3 +275,9 @@ class CardInDeck(models.Model):
 
 class IllegalActionError(Exception):
     pass
+
+
+def get_card_from_name(cardname):
+    classname = 'dominion.game.cards.' + cardname
+    cls = __import__(classname)
+    return cls()
