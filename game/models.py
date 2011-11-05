@@ -7,6 +7,16 @@ class Game(models.Model):
     finished = models.BooleanField(default=False)
     log_file = models.CharField(max_length=128)
 
+    def create_card_set(self, card_set):
+        cardset = CardSet(game=self, name=card_set.name)
+        cardset.save()
+        for cardname in card_set.cards:
+            card = get_card_from_name(cardname)
+            num_cards = card.starting_stack_size(self.num_players)
+            stack = CardStack(cardset=cardset, cardname=cardname,
+                    num_cards=num_cards, num_left=num_cards)
+            stack.save()
+
     def begin_game(self):
         """Initialize the players' decks and tell the first one it's his turn.
 
@@ -278,6 +288,6 @@ class IllegalActionError(Exception):
 
 
 def get_card_from_name(cardname):
-    classname = 'dominion.game.cards.' + cardname
+    classname = 'dominion.game.cards.' + cardname.replace(' ', '')
     cls = __import__(classname)
     return cls()

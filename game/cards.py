@@ -21,6 +21,9 @@ class Card(object):
     def victory_points(self, player):
         return self._victory_points
 
+    def starting_stack_size(self, num_players):
+        return 10
+
 
 # Coin cards
 ############
@@ -31,12 +34,18 @@ class Copper(Card):
         self._coins = 1
         self._cost = 0
 
+    def starting_stack_size(self, num_players):
+        return 60
+
 
 class Silver(Card):
     def __init__(self):
         super(self, Silver).__init__()
         self._coins = 2
         self._cost = 3
+
+    def starting_stack_size(self, num_players):
+        return 40
 
 
 class Gold(Card):
@@ -45,30 +54,12 @@ class Gold(Card):
         self._coins = 3
         self._cost = 6
 
+    def starting_stack_size(self, num_players):
+        return 30
+
 
 # Victory cards
 ###############
-
-class Estate(Card):
-    def __init__(self):
-        super(self, Estate).__init__()
-        self._cost = 2
-        self._victory_points = 1
-
-
-class Duchy(Card):
-    def __init__(self):
-        super(self, Duchy).__init__()
-        self._cost = 5
-        self._victory_points = 3
-
-
-class Province(Card):
-    def __init__(self):
-        super(self, Province).__init__()
-        self._cost = 8
-        self._victory_points = 6
-
 
 class Curse(Card):
     def __init__(self):
@@ -76,8 +67,40 @@ class Curse(Card):
         self._cost = 0
         self._victory_points = -1
 
+    def starting_stack_size(self, num_players):
+        return 30
 
-class Gardens(Card):
+
+class VictoryCard(Card):
+    def starting_stack_size(self, num_players):
+        if num_players == 2:
+            return 8
+        else:
+            return 12
+
+
+class Estate(VictoryCard):
+    def __init__(self):
+        super(self, Estate).__init__()
+        self._cost = 2
+        self._victory_points = 1
+
+
+class Duchy(VictoryCard):
+    def __init__(self):
+        super(self, Duchy).__init__()
+        self._cost = 5
+        self._victory_points = 3
+
+
+class Province(VictoryCard):
+    def __init__(self):
+        super(self, Province).__init__()
+        self._cost = 8
+        self._victory_points = 6
+
+
+class Gardens(VictoryCard):
     def __init__(self):
         super(self, Gardens).__init__()
         self._cost = 4
