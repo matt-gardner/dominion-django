@@ -10,6 +10,15 @@ This is an example of using Django with Socket.IO, meant to compliment `my blog 
 Installation
 ------------
 
+##### EDIT BY MATT #####
+
+You really just need to run these pip commands, I think, and easy_install might
+just work on it's own:
+
+gevent-socketio
+gevent-websocket
+
+
 ::
 
     git clone git://github.com/codysoyland/django-socketio-example.git
