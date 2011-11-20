@@ -83,9 +83,11 @@ class Player(models.Model):
         hand = self.deck.cards_in_hand.split()
         if card_num not in hand:
             raise IllegalActionError("Cannot get card that isn't in hand")
-        card = get_card_from_name(
-                self.deck.cards.get(card_num=card_num).cardname)
-        return card
+        return self.card_from_card_num(card_num)
+
+    def card_from_card_num(self, card_num):
+        return get_card_from_name(
+                self.deck.cards.get(card_num=card_num).cardname, card_num)
 
     def draw_card(self):
         card = self.deck.draw_card_to_hand()
@@ -98,6 +100,12 @@ class Player(models.Model):
         self.save()
         self.deck.discard_card_from_hand(card_num)
 
+    def trash_card(self, card_num):
+        card = self.get_card_from_hand(card_num)
+        self.coins -= card.coins()
+        self.save()
+        self.deck.trash_card_from_hand(card_num)
+
     def play_action(self, card_num, socket):
         if self.turn_state == TURN_STATES[0][0]:
             raise IllegalActionError("It's not your turn!")
@@ -106,6 +114,7 @@ class Player(models.Model):
             "actions")
         elif self.turn_state == TURN_STATES[3][0]:
             raise IllegalActionError("You need to wait for others to finish")
+        self.deck.move_card_to_active_play(card_num)
         card = self.get_card_from_hand(card_num)
         # This method has the responsibility to change the state of the player
         # object, and to do whatever it needs to with other players.  It does
@@ -175,6 +184,16 @@ class Deck(models.Model):
         self.last_card_num += 1
         self.save()
 
+    def add_card_to_top_of_deck(self, cardname):
+        card = CardInDeck(deck=self, cardname=cardname,
+                card_num=self.last_card_num+1)
+        card.save()
+        deck = self.cards_in_deck.split()
+        deck.insert(0, card.card_num)
+        self.cards_in_deck = ' '.join(deck)
+        self.last_card_num += 1
+        self.save()
+
     def shuffle(self):
         """Takes cards_in_discard, shuffles them, and writes to cards_in_deck.
 
@@ -194,14 +213,14 @@ class Deck(models.Model):
         """Returns a collection of Card objects representing those cards in
         hand."""
         hand = self.cards_in_hand.split()
-        return [get_card_from_name(self.cards.get(card_num=h).cardname)
+        return [get_card_from_name(self.cards.get(card_num=h).cardname, h)
                 for h in hand]
 
     def get_active_cards_in_play(self):
         """Returns a collection of Card objects representing those cards in
         play."""
         play = self.active_cards_in_play.split()
-        return [get_card_from_name(self.cards.get(card_num=c).cardname)
+        return [get_card_from_name(self.cards.get(card_num=c).cardname, c)
                 for c in play]
 
     def draw_card_to_hand(self):
@@ -239,6 +258,24 @@ class Deck(models.Model):
         self.cards_in_deck = ' '.join(deck)
         self.save()
         return card
+
+    def move_card_to_active_play(self, card_num):
+        play = self.active_cards_in_play.split()
+        hand = self.cards_in_hand.split()
+        hand.remove(card_num)
+        play.append(card_num)
+        self.active_cards_in_play = ' '.join(play)
+        self.cards_in_hand = ' '.join(hand)
+        self.save()
+
+    def move_card_from_play_to_hand(self, card_num):
+        play = self.cards_in_play.split()
+        hand = self.cards_in_hand.split()
+        play.remove(card_num)
+        hand.append(card_num)
+        self.cards_in_play = ' '.join(play)
+        self.cards_in_hand = ' '.join(hand)
+        self.save()
 
     def discard_cards_in_play(self):
         """Called at the end of turn.  Moves cards from play to discard."""
@@ -287,7 +324,7 @@ class IllegalActionError(Exception):
     pass
 
 
-def get_card_from_name(cardname):
+def get_card_from_name(cardname, card_num=-1):
     classname = 'dominion.game.cards.' + cardname.replace(' ', '')
     cls = __import__(classname)
-    return cls()
+    return cls(card_num)
