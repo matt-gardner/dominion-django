@@ -1,5 +1,26 @@
 #!/usr/bin/env python
 
+from dominion.game.socketio_base import get_message
+
+actions = {}
+actions['chancellor'] = 'Do you want to reshuffle your deck?'
+actions['discard-any'] = 'Pick any number of cards from your hand to discard'
+actions['discard-to-three'] = 'Discard cards from your hand down to three cards'
+actions['discard-two'] = 'Discard two cards from your hand'
+actions['gain-card-0'] = 'Gain a card costing up to 1 coins'
+actions['gain-card-1'] = 'Gain a card costing up to 1 coins'
+actions['gain-card-2'] = 'Gain a card costing up to 2 coins'
+actions['gain-card-3'] = 'Gain a card costing up to 3 coins'
+actions['gain-card-4'] = 'Gain a card costing up to 4 coins'
+actions['gain-card-5'] = 'Gain a card costing up to 5 coins'
+actions['gain-card-6'] = 'Gain a card costing up to 6 coins'
+actions['gain-card-7'] = 'Gain a card costing up to 7 coins'
+actions['gain-card-8'] = 'Gain a card costing up to 8 coins'
+actions['library-keep-card'] = 'Keep this action card or discard it?'
+actions['pick-action'] = 'Pick an action card from your hand'
+actions['trash-any'] = 'Pick any number of cards from your hand to trash'
+actions['trash-one'] = 'Pick a card from your hand to trash'
+actions['trash-treasure'] = 'Pick a treasure card to trash'
 
 class Card(object):
     def __init__(self, card_num):
@@ -170,8 +191,10 @@ class Cellar(ActionCard):
     def play_action(self, player, socket):
         player.num_actions += 1
         # Ask which cards to discard
-        raise NotImplementedError()
-        for i in range(num_discarded):
+        socket.send({'user-action': 'discard-any'})
+        message = get_message(socket)
+        for num in message['discarded']:
+            player.discard_card(num)
             player.draw_card()
 
 
@@ -182,8 +205,15 @@ class Chancellor(ActionCard):
 
     def play_action(self, player, socket):
         player.coins += 2
-        # I don't remember what this action is...
-        raise NotImplementedError()
+        socket.send({'user-action': 'chancellor'})
+        message = get_message(socket)
+        if message['reshuffle'] == 'yes':
+            deck = player.deck.cards_in_deck.split()
+            discard = player.deck.cards_in_discard.split()
+            discard.extend(deck)
+            player.deck.cards_in_deck = ''
+            player.deck.cards_in_discard = ' '.join(discard)
+            player.deck.save()
 
 
 class Chapel(ActionCard):
@@ -193,9 +223,10 @@ class Chapel(ActionCard):
 
     def play_action(self, player, socket):
         # Ask which cards to trash
-        raise NotImplementedError()
-        for card_num in cards_to_trash:
-            player.trash_card(card_num)
+        socket.send({'user-action': 'trash-any'})
+        message = get_message(socket)
+        for num in message['trashed']:
+            player.trash_card(num)
 
 
 class CouncilRoom(ActionCard):
@@ -220,7 +251,9 @@ class Feast(ActionCard):
 
     def play_action(self, player, socket):
         # Pick which card to buy
-        raise NotImplementedError()
+        socket.send({'user-action': 'gain-card-5'})
+        message = get_message(socket)
+        player.gain_card(message['gained'])
         player.trash_card(self._card_num)
 
 
@@ -257,9 +290,11 @@ class Library(ActionCard):
             card = player.card_from_card_num(deck.draw_card_to_play())
             if card._is_action:
                 # Ask whether to keep card or not
-                raise NotImplementedError()
-                continue
-            deck.move_card_from_play_to_hand(card)
+                socket.send({'user-action': 'library-keep-card'})
+                message = get_message(socket)
+                if message['keep'] == 'yes':
+                    continue
+            deck.move_card_from_play_to_hand(card._card_num)
             player.coins += card.coins()
 
 
@@ -294,9 +329,13 @@ class Mine(ActionCard):
 
     def play_action(self, player, socket):
         # Choose card from hand to upgrade
-        raise NotImplementedError()
+        socket.send({'user-action': 'trash-treasure'})
+        message = get_message(socket)
+        player.trash_card(message['trashed'])
         # Choose card to buy (or do it automatically...)
-        raise NotImplementedError()
+        socket.send({'user-action': 'gain-treasure'})
+        message = get_message(socket)
+        player.gain_card(message['gained'])
 
 
 class Moat(ActionCard):
@@ -316,8 +355,10 @@ class MoneyLender(ActionCard):
 
     def play_action(self, player, socket):
         # Choose copper card to trash
-        raise NotImplementedError()
-        if trashed:
+        socket.send({'user-action': 'trash-copper'})
+        message = get_message(socket)
+        if message['trashed'] != 'None':
+            player.trash_card(message['trashed'])
             player.coins += 3
 
 
@@ -328,9 +369,15 @@ class Remodel(ActionCard):
 
     def play_action(self, player, socket):
         # Pick card from hand to get rid of
-        raise NotImplementedError()
+        socket.send({'user-action': 'trash-one'})
+        message = get_message(socket)
+        card = player.card_from_card_num(message['trashed'])
+        player.trash_card(message['trashed'])
+        coins = card.coins() + 2
         # Pick card to buy
-        raise NotImplementedError()
+        socket.send({'user-action': 'gain-card-%d' % coins})
+        message = get_message(socket)
+        player.gain_card(message['gained'])
 
 
 class Smithy(ActionCard):
@@ -372,7 +419,11 @@ class ThroneRoom(ActionCard):
         self._cost = 4
 
     def play_action(self, player, socket):
-        raise NotImplementedError()
+        socket.send({'user-action': 'pick-action'})
+        message = get_message(socket)
+        card = player.card_from_card_num(message['picked'])
+        card.play_action(player, socket)
+        card.play_action(player, socket)
 
 
 class Village(ActionCard):
@@ -412,7 +463,10 @@ class Workshop(ActionCard):
         self._cost = 3
 
     def play_action(self, player, socket):
-        raise NotImplementedError()
+        # Pick which card to buy
+        socket.send({'user-action': 'gain-card-4'})
+        message = get_message(socket)
+        player.gain_card(message['gained'])
 
 
 # vim: et sw=4 sts=4

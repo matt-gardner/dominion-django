@@ -27,7 +27,6 @@ class RandomCardSet(BaseCardSet):
             self.cards.add(card)
 
 
-
 class FirstGameCardSet(BaseCardSet):
     def __init__(self):
         super(self, SelectedCardSet).__init__()

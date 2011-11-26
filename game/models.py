@@ -142,6 +142,15 @@ class Player(models.Model):
         cardstack.save()
         self.deck.add_card(cardname)
 
+    def gain_card(self, cardname):
+        cardstack = self.game.cardset.cardstack_set.get(cardname=cardname)
+        if cardstack.num_left == 0:
+            raise IllegalActionError("Cannot buy a card from an empty stack")
+        card = get_card_from_name(cardname)
+        cardstack.num_left -= 1
+        cardstack.save()
+        self.deck.add_card(cardname)
+
     def end_turn(self):
         self.deck.discard_cards_in_hand()
         self.deck.discard_cards_in_play()
