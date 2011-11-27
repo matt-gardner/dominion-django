@@ -31,10 +31,13 @@ def socketio(request):
             socketio.broadcast({'announcement':
                     socketio.session.session_id + ' disconnected'})
             break
-        if len(message) == 1 and type(message) == list:
+        if len(message) == 0:
+            # Probably a heartbeat message - move along
+            continue
+        if len(message) == 1:
             message = message[0]
         else:
-            print "ERROR: Message wasn't a list of 1 item"
+            print "ERROR: Message wasn't a list of 1 item: ", message
         if 'game' in message:
             game_id = message['game']
             game = Game.objects.get(pk=game_id)
