@@ -13,8 +13,9 @@ def exception_printer(sender, **kwargs):
 
 got_request_exception.connect(exception_printer)
 
+
 # I think the strategy here should be that this just calls methods in game
-# logic code depending on what messages it receives.  In the typically
+# logic code depending on what messages it receives.  In the typical
 # model-view-controller framework, this little piece of code is the controller.
 def socketio(request):
     socketio = request.environ['socketio']
@@ -28,6 +29,7 @@ def socketio(request):
         message = socketio.recv()
 
         if not socketio.connected():
+            disconnect_player(game_id, player)
             socketio.broadcast({'announcement':
                     socketio.session.session_id + ' disconnected'})
             break
@@ -40,28 +42,19 @@ def socketio(request):
             print "ERROR: Message wasn't a list of 1 item: ", message
         if 'game' in message:
             game_id = message['game']
-            game = Game.objects.get(pk=game_id)
-            connected_players = [p.player_num for p in
-                    game.player_set.filter(connected=True)]
-            available = [x+1 for x in range(game.num_players)]
+            available = get_available_players(game_id)
             socketio.send({'available': available})
         elif 'player' in message:
-            game = Game.objects.get(pk=game_id)
             player = message['player']
-            current_player = game.current_player
-            message = {'count': game.count,
-                    'current_player': current_player}
-            socketio.send(message)
+            connect_player(game_id, player)
+            state = get_game_state(game_id)
+            socketio.send({'state': state})
+        elif 'endturn' in message:
+            end_turn(game_id)
+            state = get_game_state(game_id)
+            socketio.broadcast({'state': state})
+            socketio.send({'state': state})
         elif 'val' in message:
-            if not game_id:
-                print 'ERROR: game_id is not initialized'
-            if not player:
-                print 'ERROR: player is not initialized'
-            # We need to re-query for the game object every time so that all of
-            # its fields are up to date; otherwise we would only have stale
-            # information in game.  This assumes that these messages are
-            # reasonably far apart, so that we don't get race conditions.  But
-            # that should be fine for the applications I'm considering.
             game = Game.objects.get(pk=game_id)
             current_player = game.current_player
             if current_player == player:
@@ -82,3 +75,50 @@ def socketio(request):
             print message
 
     return HttpResponse()
+
+
+# GAME LOGIC METHODS
+####################
+
+# To be moved when I decide on an appropriate place for them
+
+# We need to re-query for the game object in every method so that all of its
+# fields are up to date; otherwise we would only have stale information in
+# game.  This assumes that these messages are reasonably far apart, so that we
+# don't get race conditions.  But that should be fine for the applications I'm
+# considering.
+
+
+def get_available_players(game_id):
+    game = Game.objects.get(pk=game_id)
+    connected_players = [p.player_num for p in
+            game.player_set.filter(connected=True)]
+    return [x+1 for x in range(game.num_players)]
+
+
+def get_game_state(game_id):
+    game = Game.objects.get(pk=game_id)
+    return game.current_player
+
+
+def end_turn(game_id):
+    game = Game.objects.get(pk=game_id)
+    current_player = game.current_player
+    game.current_player = current_player % game.num_players + 1
+    game.save()
+
+
+def connect_player(game_id, player_num):
+    game = Game.objects.get(pk=game_id)
+    player = game.player_set.get(player_num=player_num)
+    player.connected = True
+    player.save()
+
+
+def disconnect_player(game_id, player_num):
+    game = Game.objects.get(pk=game_id)
+    player = game.player_set.get(player_num=player_num)
+    player.connected = False
+    player.save()
+
+# vim: et sw=4 sts=4

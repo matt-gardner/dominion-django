@@ -44,10 +44,7 @@ class Agent(object):
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) > 1:
-        player = int(sys.argv[1])
-    else:
-        player = 0
+    player = 0
     a = Agent(player)
     a.connect("ws://localhost:9000/socket.io/websocket")
 
