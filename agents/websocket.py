@@ -183,9 +183,10 @@ class _Dispatcher(asyncore.dispatcher):
                 callback(data)
 
     def _handle_frame(self, frame):
-        assert frame[-1] == '\xff'
+        if frame[-1] != '\xff':
+            raise WebSocketError("Frame didn't end right")
         if frame[0] != '\x00':
-            raise WebSocketError('WebSocket stream error')
+            raise WebSocketError("Frame didn't begin right")
 
         if self.ws.onmessage:
             message = decode_socketio_message(frame[1:-1])

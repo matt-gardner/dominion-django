@@ -48,7 +48,10 @@ def socketio(request):
         elif 'player' in message:
             game = Game.objects.get(pk=game_id)
             player = message['player']
-            socketio.send({'count': game.count})
+            current_player = game.current_player
+            message = {'count': game.count,
+                    'current_player': current_player}
+            socketio.send(message)
         elif 'val' in message:
             if not game_id:
                 print 'ERROR: game_id is not initialized'
@@ -65,7 +68,8 @@ def socketio(request):
                 game.count += 1
                 game.current_player = current_player % game.num_players + 1
                 game.save()
-                message = {'count': game.count}
+                message = {'count': game.count,
+                        'current_player': game.current_player}
                 # We need to do both here, because broadcast only goes to other
                 # people, not yourself.  I prefer just sending to everyone,
                 # including yourself.
