@@ -29,9 +29,48 @@ class RandomCardSet(BaseCardSet):
 
 class FirstGameCardSet(BaseCardSet):
     def __init__(self):
-        super(self, SelectedCardSet).__init__()
+        super(self, FirstGameCardSet).__init__()
         self.name = 'First Game'
-        raise NotFinishedError()
+        cards = set(['Cellar', 'Market', 'Militia', 'Mine', 'Moat', 'Remodel',
+                'Smithy', 'Village', 'Woodcutter', 'Workshop'])
+        self.cards.update(cards)
+
+
+class BigMoneyCardSet(BaseCardSet):
+    def __init__(self):
+        super(self, BigMoneyCardSet).__init__()
+        self.name = 'Big Money'
+        cards = set(['Adventurer', 'Bureaucrat', 'Chancellor', 'Chapel',
+                'Feast', 'Laboratory', 'Market', 'Mine', 'Moneylender',
+                'Throne Room'])
+        self.cards.update(cards)
+
+
+class InteractionCardSet(BaseCardSet):
+    def __init__(self):
+        super(self, InteractionCardSet).__init__()
+        self.name = 'Interaction'
+        cards = set(['Bureaucrat', 'Chancellor', 'Council Room', 'Festival',
+                'Library', 'Militia', 'Moat', 'Spy', 'Thief', 'Village'])
+        self.cards.update(cards)
+
+
+class SizeDistortionCardSet(BaseCardSet):
+    def __init__(self):
+        super(self, SizeDistortionCardSet).__init__()
+        self.name = 'Size Distortion'
+        cards = set(['Cellar', 'Chapel', 'Feast', 'Gardens', 'Laboratory',
+                'Thief', 'Village', 'Witch', 'Woodcutter', 'Workshop'])
+        self.cards.update(cards)
+
+
+class VillageSquareCardSet(BaseCardSet):
+    def __init__(self):
+        super(self, VillageSquareCardSet).__init__()
+        self.name = 'Village Square'
+        cards = set(['Bureaucrat', 'Cellar', 'Festival', 'Library', 'Market',
+                'Remodel', 'Smithy', 'Throne Room', 'Village', 'Woodcutter'])
+        self.cards.update(cards)
 
 
 # vim: et sw=4 sts=4

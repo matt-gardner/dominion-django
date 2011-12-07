@@ -2,7 +2,6 @@ from django.db import models
 
 class Game(models.Model):
     # For initial testing - to be removed
-    count = models.IntegerField(default=0)
     name = models.CharField(max_length=128)
     num_players = models.IntegerField(default=4)
     current_player = models.IntegerField(default=1) # 1 based, not 0 based
