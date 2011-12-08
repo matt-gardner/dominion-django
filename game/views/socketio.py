@@ -48,12 +48,28 @@ def socketio(request):
             player = message['player']
             connect_player(game_id, player)
             state = get_game_state(game_id)
-            socketio.send({'state': state})
+            socketio.send({'connected': 'connected', 'state': state})
+        elif 'myturn' in message:
+            if player == Game.objects.get(pk=game_id).current_player:
+                hand = get_players_hand(game_id, player)
+                state = get_game_state(game_id)
+                message = {'yourturn': 'your turn', 'hand': hand,
+                        'state': state}
+                socketio.send(message)
+            else:
+                socketio.send({'notyourturn': 'not your turn'})
+        elif 'playaction' in message:
+            card_num = message['playaction']
+            play_action(game_id, player, card_num, socketio)
+        elif 'buycard' in message:
+            cardname = message['buycard']
+            buy_card(game_id, player, cardname)
         elif 'endturn' in message:
             end_turn(game_id)
             state = get_game_state(game_id)
-            socketio.broadcast({'state': state})
-            socketio.send({'state': state})
+            message = {'state': state, 'newturn': 'newturn'}
+            socketio.broadcast(message)
+            socketio.send(message)
         elif 'val' in message:
             game = Game.objects.get(pk=game_id)
             current_player = game.current_player
@@ -89,6 +105,23 @@ def socketio(request):
 # considering.
 
 
+def get_player(game_id, player_num):
+    game = Game.objects.get(pk=game_id)
+    return game.player_set.get(player_num=player_num)
+
+
+def connect_player(game_id, player_num):
+    player = get_player(game_id, player_num)
+    player.connected = True
+    player.save()
+
+
+def disconnect_player(game_id, player_num):
+    player = get_player(game_id, player_num)
+    player.connected = False
+    player.save()
+
+
 def get_available_players(game_id):
     game = Game.objects.get(pk=game_id)
     connected_players = [p.player_num for p in
@@ -96,9 +129,26 @@ def get_available_players(game_id):
     return [x+1 for x in range(game.num_players)]
 
 
+def get_players_hand(game_id, player_num):
+    player = get_player(game_id, player_num)
+    hand = player.get_hand()
+    # We have to make the card objects JSON compatible - the receiving end can
+    # reproduce the card objects from the name
+    return [(c.cardname, c._card_num) for c in hand]
+
+
 def get_game_state(game_id):
-    game = Game.objects.get(pk=game_id)
-    return game.current_player
+    return State(game_id)
+
+
+def play_action(game_id, player_num, card_num, socket):
+    player = get_player(game_id, player_num)
+    player.play_action(card_num, socket)
+
+
+def buy_card(game_id, player_num, cardname):
+    player = get_player(game_id, player_num)
+    player.buy_card(cardname)
 
 
 def end_turn(game_id):
@@ -108,17 +158,12 @@ def end_turn(game_id):
     game.save()
 
 
-def connect_player(game_id, player_num):
-    game = Game.objects.get(pk=game_id)
-    player = game.player_set.get(player_num=player_num)
-    player.connected = True
-    player.save()
+class State(dict):
+    def __init__(self, game_id):
+        game = Game.objects.select_related().get(pk=game_id)
+        self['current_player'] = game.current_player
+        self['cardstacks'] = [(c.cardname, c.num_left) for c in
+                game.cardset.cardstack_set.all()]
 
-
-def disconnect_player(game_id, player_num):
-    game = Game.objects.get(pk=game_id)
-    player = game.player_set.get(player_num=player_num)
-    player.connected = False
-    player.save()
 
 # vim: et sw=4 sts=4

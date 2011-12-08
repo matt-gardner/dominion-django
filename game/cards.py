@@ -31,6 +31,7 @@ class Card(object):
         self._is_treasure = False
         self._is_action = False
         self._is_victory = False
+        self.cardname = None
 
     def play_action(self, player, socket):
         raise IllegalActionError("This card has no action")
@@ -54,35 +55,40 @@ class Card(object):
 ############
 
 class TreasureCard(Card):
-    def __init__(self):
-        super(self, TreasureCard).__init__()
+    def __init__(self, card_num):
+        super(TreasureCard, self).__init__(card_num)
         self._is_treasure = True
+        self.cardname = None
+
 
 class Copper(TreasureCard):
-    def __init__(self):
-        super(self, Copper).__init__()
+    def __init__(self, card_num):
+        super(Copper, self).__init__(card_num)
         self._coins = 1
         self._cost = 0
+        self.cardname = 'Copper'
 
     def starting_stack_size(self, num_players):
         return 60
 
 
 class Silver(TreasureCard):
-    def __init__(self):
-        super(self, Silver).__init__()
+    def __init__(self, card_num):
+        super(Silver, self).__init__(card_num)
         self._coins = 2
         self._cost = 3
+        self.cardname = 'Silver'
 
     def starting_stack_size(self, num_players):
         return 40
 
 
 class Gold(TreasureCard):
-    def __init__(self):
-        super(self, Gold).__init__()
+    def __init__(self, card_num):
+        super(Gold, self).__init__(card_num)
         self._coins = 3
         self._cost = 6
+        self.cardname = 'Gold'
 
     def starting_stack_size(self, num_players):
         return 30
@@ -92,18 +98,19 @@ class Gold(TreasureCard):
 ###############
 
 class Curse(Card):
-    def __init__(self):
-        super(self, Curse).__init__()
+    def __init__(self, card_num):
+        super(Curse, self).__init__(card_num)
         self._cost = 0
         self._victory_points = -1
+        self.cardname = 'Curse'
 
     def starting_stack_size(self, num_players):
         return 30
 
 
 class VictoryCard(Card):
-    def __init__(self):
-        super(self, VictoryCard).__init__()
+    def __init__(self, card_num):
+        super(VictoryCard, self).__init__(card_num)
         self.is_victory = True
 
     def starting_stack_size(self, num_players):
@@ -114,30 +121,34 @@ class VictoryCard(Card):
 
 
 class Estate(VictoryCard):
-    def __init__(self):
-        super(self, Estate).__init__()
+    def __init__(self, card_num):
+        super(Estate, self).__init__(card_num)
         self._cost = 2
         self._victory_points = 1
+        self.cardname = 'Estate'
 
 
 class Duchy(VictoryCard):
-    def __init__(self):
-        super(self, Duchy).__init__()
+    def __init__(self, card_num):
+        super(Duchy, self).__init__(card_num)
         self._cost = 5
         self._victory_points = 3
+        self.cardname = 'Duchy'
 
 
 class Province(VictoryCard):
-    def __init__(self):
-        super(self, Province).__init__()
+    def __init__(self, card_num):
+        super(Province, self).__init__(card_num)
         self._cost = 8
         self._victory_points = 6
+        self.cardname = 'Province'
 
 
 class Gardens(VictoryCard):
-    def __init__(self):
-        super(self, Gardens).__init__()
+    def __init__(self, card_num):
+        super(Gardens, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Gardens'
 
     def victory_points(self, player):
         return int(player.deck.get_num_cards() / 10)
@@ -147,15 +158,16 @@ class Gardens(VictoryCard):
 ##############
 
 class ActionCard(Card):
-    def __init__(self):
-        super(self, ActionCard).__init__()
+    def __init__(self, card_num):
+        super(ActionCard, self).__init__(card_num)
         self._is_action = True
 
 
 class Adventurer(ActionCard):
-    def __init__(self):
-        super(self, Adventurer).__init__()
+    def __init__(self, card_num):
+        super(Adventurer, self).__init__(card_num)
         self._cost = 6
+        self.cardname = 'Adventurer'
 
     def play_action(self, player, socket):
         num_treasure = 0
@@ -169,9 +181,10 @@ class Adventurer(ActionCard):
 
 
 class Bureaucrat(ActionCard):
-    def __init__(self):
-        super(self, Bureaucrat).__init__()
+    def __init__(self, card_num):
+        super(Bureaucrat, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Bureaucrat'
 
     def play_action(self, player, socket):
         silver_stack = player.game.cardset.cardstack_set.get(cardname='Silver')
@@ -184,9 +197,10 @@ class Bureaucrat(ActionCard):
 
 
 class Cellar(ActionCard):
-    def __init__(self):
-        super(self, Cellar).__init__()
+    def __init__(self, card_num):
+        super(Cellar, self).__init__(card_num)
         self._cost = 2
+        self.cardname = 'Cellar'
 
     def play_action(self, player, socket):
         player.num_actions += 1
@@ -199,9 +213,10 @@ class Cellar(ActionCard):
 
 
 class Chancellor(ActionCard):
-    def __init__(self):
-        super(self, Chancellor).__init__()
+    def __init__(self, card_num):
+        super(Chancellor, self).__init__(card_num)
         self._cost = 3
+        self.cardname = 'Chancellor'
 
     def play_action(self, player, socket):
         player.coins += 2
@@ -217,9 +232,10 @@ class Chancellor(ActionCard):
 
 
 class Chapel(ActionCard):
-    def __init__(self):
-        super(self, Chapel).__init__()
+    def __init__(self, card_num):
+        super(Chapel, self).__init__(card_num)
         self._cost = 2
+        self.cardname = 'Chapel'
 
     def play_action(self, player, socket):
         # Ask which cards to trash
@@ -230,9 +246,10 @@ class Chapel(ActionCard):
 
 
 class CouncilRoom(ActionCard):
-    def __init__(self):
-        super(self, CouncilRoom).__init__()
+    def __init__(self, card_num):
+        super(CouncilRoom, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'CouncilRoom'
 
     def play_action(self, player, socket):
         player.draw_card()
@@ -245,9 +262,10 @@ class CouncilRoom(ActionCard):
 
 
 class Feast(ActionCard):
-    def __init__(self):
-        super(self, Feast).__init__()
+    def __init__(self, card_num):
+        super(Feast, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Feast'
 
     def play_action(self, player, socket):
         # Pick which card to buy
@@ -258,9 +276,10 @@ class Feast(ActionCard):
 
 
 class Festival(ActionCard):
-    def __init__(self):
-        super(self, Festival).__init__()
+    def __init__(self, card_num):
+        super(Festival, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Festival'
 
     def play_action(self, player, socket):
         player.num_actions += 2
@@ -269,9 +288,10 @@ class Festival(ActionCard):
 
 
 class Laboratory(ActionCard):
-    def __init__(self):
-        super(self, Laboratory).__init__()
+    def __init__(self, card_num):
+        super(Laboratory, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Laboratory'
 
     def play_action(self, player, socket):
         player.num_actions += 1
@@ -280,9 +300,10 @@ class Laboratory(ActionCard):
 
 
 class Library(ActionCard):
-    def __init__(self):
-        super(self, Library).__init__()
+    def __init__(self, card_num):
+        super(Library, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Library'
 
     def play_action(self, player, socket):
         deck = player.deck
@@ -300,9 +321,10 @@ class Library(ActionCard):
 
 
 class Market(ActionCard):
-    def __init__(self):
-        super(self, Market).__init__()
+    def __init__(self, card_num):
+        super(Market, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Market'
 
     def play_action(self, player, socket):
         player.coins += 1
@@ -312,9 +334,10 @@ class Market(ActionCard):
 
 
 class Militia(ActionCard):
-    def __init__(self):
-        super(self, Militia).__init__()
+    def __init__(self, card_num):
+        super(Militia, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Militia'
 
     def play_action(self, player, socket):
         player.coins += 2
@@ -323,9 +346,10 @@ class Militia(ActionCard):
 
 
 class Mine(ActionCard):
-    def __init__(self):
-        super(self, Mine).__init__()
+    def __init__(self, card_num):
+        super(Mine, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Mine'
 
     def play_action(self, player, socket):
         # Choose card from hand to upgrade
@@ -339,9 +363,10 @@ class Mine(ActionCard):
 
 
 class Moat(ActionCard):
-    def __init__(self):
-        super(self, Moat).__init__()
+    def __init__(self, card_num):
+        super(Moat, self).__init__(card_num)
         self._cost = 2
+        self.cardname = 'Moat'
 
     def play_action(self, player, socket):
         player.draw_card()
@@ -349,9 +374,10 @@ class Moat(ActionCard):
 
 
 class MoneyLender(ActionCard):
-    def __init__(self):
-        super(self, MoneyLender).__init__()
+    def __init__(self, card_num):
+        super(MoneyLender, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'MoneyLender'
 
     def play_action(self, player, socket):
         # Choose copper card to trash
@@ -363,9 +389,10 @@ class MoneyLender(ActionCard):
 
 
 class Remodel(ActionCard):
-    def __init__(self):
-        super(self, Remodel).__init__()
+    def __init__(self, card_num):
+        super(Remodel, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Remodel'
 
     def play_action(self, player, socket):
         # Pick card from hand to get rid of
@@ -381,9 +408,10 @@ class Remodel(ActionCard):
 
 
 class Smithy(ActionCard):
-    def __init__(self):
-        super(self, Smithy).__init__()
+    def __init__(self, card_num):
+        super(Smithy, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Smithy'
 
     def play_action(self, player, socket):
         player.draw_card()
@@ -392,9 +420,10 @@ class Smithy(ActionCard):
 
 
 class Spy(ActionCard):
-    def __init__(self):
-        super(self, Spy).__init__()
+    def __init__(self, card_num):
+        super(Spy, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Spy'
 
     def play_action(self, player, socket):
         self.draw_card()
@@ -404,9 +433,10 @@ class Spy(ActionCard):
 
 
 class Thief(ActionCard):
-    def __init__(self):
-        super(self, Thief).__init__()
+    def __init__(self, card_num):
+        super(Thief, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'Thief'
 
     def play_action(self, player, socket):
         for other in player.game.get_other_players():
@@ -414,9 +444,10 @@ class Thief(ActionCard):
 
 
 class ThroneRoom(ActionCard):
-    def __init__(self):
-        super(self, ThroneRoom).__init__()
+    def __init__(self, card_num):
+        super(ThroneRoom, self).__init__(card_num)
         self._cost = 4
+        self.cardname = 'ThroneRoom'
 
     def play_action(self, player, socket):
         socket.send({'user-action': 'pick-action'})
@@ -427,9 +458,10 @@ class ThroneRoom(ActionCard):
 
 
 class Village(ActionCard):
-    def __init__(self):
-        super(self, Village).__init__()
+    def __init__(self, card_num):
+        super(Village, self).__init__(card_num)
         self._cost = 3
+        self.cardname = 'Village'
 
     def play_action(self, player, socket):
         player.num_actions += 2
@@ -437,9 +469,10 @@ class Village(ActionCard):
 
 
 class Witch(ActionCard):
-    def __init__(self):
-        super(self, Witch).__init__()
+    def __init__(self, card_num):
+        super(Witch, self).__init__(card_num)
         self._cost = 5
+        self.cardname = 'Witch'
 
     def play_action(self, player, socket):
         player.draw_card()
@@ -448,9 +481,10 @@ class Witch(ActionCard):
 
 
 class Woodcutter(ActionCard):
-    def __init__(self):
-        super(self, Woodcutter).__init__()
+    def __init__(self, card_num):
+        super(Woodcutter, self).__init__(card_num)
         self._cost = 3
+        self.cardname = 'Woodcutter'
 
     def play_action(self, player, socket):
         player.num_buys += 1
@@ -458,9 +492,10 @@ class Woodcutter(ActionCard):
 
 
 class Workshop(ActionCard):
-    def __init__(self):
-        super(self, Workshop).__init__()
+    def __init__(self, card_num):
+        super(Workshop, self).__init__(card_num)
         self._cost = 3
+        self.cardname = 'Workshop'
 
     def play_action(self, player, socket):
         # Pick which card to buy
@@ -468,5 +503,40 @@ class Workshop(ActionCard):
         message = get_message(socket)
         player.gain_card(message['gained'])
 
+
+card_from_name = {
+        'Copper': Copper,
+        'Silver': Silver,
+        'Gold': Gold,
+        'Curse': Curse,
+        'Estate': Estate,
+        'Duchy': Duchy,
+        'Province': Province,
+        'Gardens': Gardens,
+        'Adventurer': Adventurer,
+        'Bureaucrat': Bureaucrat,
+        'Cellar': Cellar,
+        'Chancellor': Chancellor,
+        'Chapel': Chapel,
+        'CouncilRoom': CouncilRoom,
+        'Feast': Feast,
+        'Festival': Festival,
+        'Laboratory': Laboratory,
+        'Library': Library,
+        'Market': Market,
+        'Militia': Militia,
+        'Mine': Mine,
+        'Moat': Moat,
+        'MoneyLender': MoneyLender,
+        'Remodel': Remodel,
+        'Smithy': Smithy,
+        'Spy': Spy,
+        'Thief': Thief,
+        'ThroneRoom': ThroneRoom,
+        'Village': Village,
+        'Witch': Witch,
+        'Woodcutter': Woodcutter,
+        'Workshop': Workshop,
+        }
 
 # vim: et sw=4 sts=4

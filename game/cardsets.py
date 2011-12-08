@@ -16,7 +16,7 @@ class BaseCardSet(object):
 
 class RandomCardSet(BaseCardSet):
     def __init__(self):
-        super(self, RandomCardSet).__init__()
+        super(RandomCardSet, self).__init__()
         self.name = 'Random'
         from random import Random
         r = Random()
@@ -29,7 +29,7 @@ class RandomCardSet(BaseCardSet):
 
 class FirstGameCardSet(BaseCardSet):
     def __init__(self):
-        super(self, FirstGameCardSet).__init__()
+        super(FirstGameCardSet, self).__init__()
         self.name = 'First Game'
         cards = set(['Cellar', 'Market', 'Militia', 'Mine', 'Moat', 'Remodel',
                 'Smithy', 'Village', 'Woodcutter', 'Workshop'])
@@ -38,7 +38,7 @@ class FirstGameCardSet(BaseCardSet):
 
 class BigMoneyCardSet(BaseCardSet):
     def __init__(self):
-        super(self, BigMoneyCardSet).__init__()
+        super(BigMoneyCardSet, self).__init__()
         self.name = 'Big Money'
         cards = set(['Adventurer', 'Bureaucrat', 'Chancellor', 'Chapel',
                 'Feast', 'Laboratory', 'Market', 'Mine', 'Moneylender',
@@ -48,7 +48,7 @@ class BigMoneyCardSet(BaseCardSet):
 
 class InteractionCardSet(BaseCardSet):
     def __init__(self):
-        super(self, InteractionCardSet).__init__()
+        super(InteractionCardSet, self).__init__()
         self.name = 'Interaction'
         cards = set(['Bureaucrat', 'Chancellor', 'Council Room', 'Festival',
                 'Library', 'Militia', 'Moat', 'Spy', 'Thief', 'Village'])
@@ -57,7 +57,7 @@ class InteractionCardSet(BaseCardSet):
 
 class SizeDistortionCardSet(BaseCardSet):
     def __init__(self):
-        super(self, SizeDistortionCardSet).__init__()
+        super(SizeDistortionCardSet, self).__init__()
         self.name = 'Size Distortion'
         cards = set(['Cellar', 'Chapel', 'Feast', 'Gardens', 'Laboratory',
                 'Thief', 'Village', 'Witch', 'Woodcutter', 'Workshop'])
@@ -66,7 +66,7 @@ class SizeDistortionCardSet(BaseCardSet):
 
 class VillageSquareCardSet(BaseCardSet):
     def __init__(self):
-        super(self, VillageSquareCardSet).__init__()
+        super(VillageSquareCardSet, self).__init__()
         self.name = 'Village Square'
         cards = set(['Bureaucrat', 'Cellar', 'Festival', 'Library', 'Market',
                 'Remodel', 'Smithy', 'Throne Room', 'Village', 'Woodcutter'])

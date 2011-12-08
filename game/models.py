@@ -1,4 +1,5 @@
 from django.db import models
+from random import Random
 
 class Game(models.Model):
     # For initial testing - to be removed
@@ -75,10 +76,13 @@ class Player(models.Model):
     def begin_turn(self):
         # We don't reset coins here, because that's easiest to take care of
         # when we draw cards, which we do at the end of the turn.
-        self.turn_state = TURN_STATES[1][0]
+        self.turn_state = self.TURN_STATES[1][0]
         self.num_actions = 1
         self.num_buys = 1
         self.save()
+
+    def get_hand(self):
+        return self.deck.get_cards_in_hand()
 
     def get_card_from_hand(self, card_num):
         hand = self.deck.cards_in_hand.split()
@@ -91,7 +95,7 @@ class Player(models.Model):
                 self.deck.cards.get(card_num=card_num).cardname, card_num)
 
     def draw_card(self):
-        card = self.deck.draw_card_to_hand()
+        card = self.card_from_card_num(self.deck.draw_card_to_hand())
         self.coins += card.coins()
         self.save()
 
@@ -108,12 +112,12 @@ class Player(models.Model):
         self.deck.trash_card_from_hand(card_num)
 
     def play_action(self, card_num, socket):
-        if self.turn_state == TURN_STATES[0][0]:
+        if self.turn_state == self.TURN_STATES[0][0]:
             raise IllegalActionError("It's not your turn!")
-        elif self.turn_state == TURN_STATES[2][0]:
+        elif self.turn_state == self.TURN_STATES[2][0]:
             raise IllegalActionError("You're in a buy state, you can't play "
             "actions")
-        elif self.turn_state == TURN_STATES[3][0]:
+        elif self.turn_state == self.TURN_STATES[3][0]:
             raise IllegalActionError("You need to wait for others to finish")
         self.deck.move_card_to_active_play(card_num)
         card = self.get_card_from_hand(card_num)
@@ -123,14 +127,14 @@ class Player(models.Model):
         card.play_action(self, socket)
         self.num_actions -= 1
         if self.num_actions == 0:
-            self.turn_state = TURN_STATES[2][0]
+            self.turn_state = self.TURN_STATES[2][0]
         self.save()
 
     def buy_card(self, cardname):
-        if self.turn_state == TURN_STATES[0][0]:
+        if self.turn_state == self.TURN_STATES[0][0]:
             raise IllegalActionError("It's not your turn!")
-        elif self.turn_state == TURN_STATES[1][0]:
-            self.turn_state = TURN_STATES[2][0]
+        elif self.turn_state == self.TURN_STATES[1][0]:
+            self.turn_state = self.TURN_STATES[2][0]
         cardstack = self.game.cardset.cardstack_set.get(cardname=cardname)
         if cardstack.num_left == 0:
             raise IllegalActionError("Cannot buy a card from an empty stack")
@@ -158,7 +162,7 @@ class Player(models.Model):
         self.deck.discard_active_cards_in_play()
         for i in range(5):
             self.draw_card()
-        self.turn_state = TURN_STATES[0][0]
+        self.turn_state = self.TURN_STATES[0][0]
         self.save()
 
 
@@ -189,7 +193,7 @@ class Deck(models.Model):
                 card_num=self.last_card_num+1)
         card.save()
         discard = self.cards_in_discard.split()
-        discard.append(card.card_num)
+        discard.append(str(card.card_num))
         self.cards_in_discard = ' '.join(discard)
         self.last_card_num += 1
         self.save()
@@ -199,7 +203,7 @@ class Deck(models.Model):
                 card_num=self.last_card_num+1)
         card.save()
         deck = self.cards_in_deck.split()
-        deck.insert(0, card.card_num)
+        deck.insert(0, str(card.card_num))
         self.cards_in_deck = ' '.join(deck)
         self.last_card_num += 1
         self.save()
@@ -210,7 +214,7 @@ class Deck(models.Model):
         cards_in_deck should be empty when this is called.  We enforce this by
         raising an IllegalActionError if the deck is not empty.
         """
-        if len(cards_in_deck) != 0:
+        if len(self.cards_in_deck) != 0:
             raise IllegalActionError("Tried to shuffle when deck wasn't empty")
         cards = self.cards_in_discard.split()
         r = Random()
@@ -335,6 +339,6 @@ class IllegalActionError(Exception):
 
 
 def get_card_from_name(cardname, card_num=-1):
-    classname = 'dominion.game.cards.' + cardname.replace(' ', '')
-    cls = __import__(classname)
+    from dominion.game.cards import card_from_name
+    cls = card_from_name[cardname.replace(' ', '')]
     return cls(card_num)
