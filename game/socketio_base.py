@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-def get_message(socket):
+def get_message(socketio):
     message = socketio.recv()
     if not socketio.connected():
         raise ConnectionLostError()
