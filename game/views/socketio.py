@@ -38,6 +38,7 @@ def socketio(request):
             continue
         if len(message) == 1:
             message = message[0]
+            print message
         else:
             print "ERROR: Message wasn't a list of 1 item: ", message
         if 'game' in message:
