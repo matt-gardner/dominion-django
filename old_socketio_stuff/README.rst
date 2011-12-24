@@ -18,6 +18,8 @@ just work on it's own:
 gevent-socketio
 gevent-websocket
 
+And it turns out that gevent-websocket is required by gevent-socketio, so
+getting the first one should be all you need.
 
 ::
 
