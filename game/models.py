@@ -119,8 +119,8 @@ class Player(models.Model):
             "actions")
         elif self.turn_state == self.TURN_STATES[3][0]:
             raise IllegalActionError("You need to wait for others to finish")
-        self.deck.move_card_to_active_play(card_num)
         card = self.get_card_from_hand(card_num)
+        self.deck.move_card_to_active_play(card_num)
         # This method has the responsibility to change the state of the player
         # object, and to do whatever it needs to with other players.  It does
         # not necessarily need to save the player, as we do that here.
