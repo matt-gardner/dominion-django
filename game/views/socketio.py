@@ -126,7 +126,9 @@ def get_available_players(game_id):
     game = Game.objects.get(pk=game_id)
     connected_players = [p.player_num for p in
             game.player_set.filter(connected=True)]
-    return [x+1 for x in range(game.num_players)]
+    players = [x+1 for x in range(game.num_players)]
+    available = [p for p in players if p not in connected_players]
+    return available
 
 
 def get_players_hand(game_id, player_num):
