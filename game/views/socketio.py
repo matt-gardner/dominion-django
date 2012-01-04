@@ -45,6 +45,7 @@ def socketio(request):
             continue
         if len(message) == 1:
             message = message[0]
+            print message
         else:
             print "ERROR: Message wasn't a list of 1 item: ", message
         if 'game' in message:
@@ -72,7 +73,7 @@ def socketio(request):
             cardname = message['buycard']
             buy_card(game_id, player, cardname)
         elif 'endturn' in message:
-            end_turn(game_id)
+            end_turn(game_id, player)
             state = get_game_state(game_id)
             message = {'state': state, 'newturn': 'newturn'}
             socketio.broadcast(message)
@@ -134,7 +135,9 @@ def get_available_players(game_id):
     game = Game.objects.get(pk=game_id)
     connected_players = [p.player_num for p in
             game.player_set.filter(connected=True)]
-    return [x+1 for x in range(game.num_players)]
+    players = [x+1 for x in range(game.num_players)]
+    available = [p for p in players if p not in connected_players]
+    return available
 
 
 def get_players_hand(game_id, player_num):
@@ -159,11 +162,17 @@ def buy_card(game_id, player_num, cardname):
     player.buy_card(cardname)
 
 
-def end_turn(game_id):
+def end_turn(game_id, player_num):
     game = Game.objects.get(pk=game_id)
     current_player = game.current_player
+    if current_player != player_num:
+        raise ValueError("Something's wrong...")
     game.current_player = current_player % game.num_players + 1
     game.save()
+    player = game.player_set.get(player_num=player_num)
+    player.end_turn()
+    next_player = game.player_set.get(player_num=game.current_player)
+    next_player.begin_turn()
 
 
 class State(dict):
