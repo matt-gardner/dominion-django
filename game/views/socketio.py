@@ -14,6 +14,13 @@ def exception_printer(sender, **kwargs):
 got_request_exception.connect(exception_printer)
 
 
+LOGGING = True
+
+def log_info(*args):
+    if LOGGING:
+        print args
+
+
 # I think the strategy here should be that this just calls methods in game
 # logic code depending on what messages it receives.  In the typical
 # model-view-controller framework, this little piece of code is the controller.
@@ -114,6 +121,7 @@ def connect_player(game_id, player_num):
     player = get_player(game_id, player_num)
     player.connected = True
     player.save()
+    log_info('Connected player', player_num, 'to game', game_id)
 
 
 def disconnect_player(game_id, player_num):
