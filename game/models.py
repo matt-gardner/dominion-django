@@ -71,6 +71,7 @@ class Player(models.Model):
     num_actions = models.IntegerField(default=1)
     num_buys = models.IntegerField(default=1)
     coins = models.IntegerField(default=0)
+    # Is this necessary?
     waiting_for = models.TextField() # this is a JSON encoded string
 
     def begin_turn(self):
@@ -156,6 +157,15 @@ class Player(models.Model):
         cardstack.save()
         self.deck.add_card(cardname)
 
+    def gain_card_to_hand(self, cardname):
+        cardstack = self.game.cardset.cardstack_set.get(cardname=cardname)
+        if cardstack.num_left == 0:
+            raise IllegalActionError("Cannot buy a card from an empty stack")
+        card = get_card_from_name(cardname)
+        cardstack.num_left -= 1
+        cardstack.save()
+        self.deck.add_card(cardname)
+
     def end_turn(self):
         self.deck.discard_cards_in_hand()
         self.deck.discard_cards_in_play()
@@ -205,6 +215,16 @@ class Deck(models.Model):
         deck = self.cards_in_deck.split()
         deck.insert(0, str(card.card_num))
         self.cards_in_deck = ' '.join(deck)
+        self.last_card_num += 1
+        self.save()
+
+    def add_card_to_hand(self, cardname):
+        card = CardInDeck(deck=self, cardname=cardname,
+                card_num=self.last_card_num+1)
+        card.save()
+        hand = self.cards_in_hand.split()
+        hand.insert(0, str(card.card_num))
+        self.cards_in_hand = ' '.join(hand)
         self.last_card_num += 1
         self.save()
 
@@ -291,6 +311,15 @@ class Deck(models.Model):
         self.cards_in_hand = ' '.join(hand)
         self.save()
 
+    def card_from_hand_to_top_of_deck(self, card_num):
+        hand = self.cards_in_hand.split()
+        deck = self.cards_in_deck.split()
+        hand.remove(card_num)
+        deck.insert(0, card_num)
+        self.cards_in_hand = ' '.join(hand)
+        self.cards_in_deck = ' '.join(deck)
+        self.save()
+
     def discard_cards_in_play(self):
         """Called at the end of turn.  Moves cards from play to discard."""
         play = self.cards_in_play.split()
@@ -325,6 +354,12 @@ class Deck(models.Model):
         discard.append(card_num)
         self.cards_in_hand = ' '.join(hand)
         self.cards_in_discard = ' '.join(discard)
+        self.save()
+
+    def trash_card_from_hand(self, card_num):
+        hand = self.cards_in_hand.split()
+        hand.remove(card_num)
+        self.cards_in_hand = ' '.join(hand)
         self.save()
 
 
