@@ -18,7 +18,8 @@ LOGGING = True
 
 def log_info(*args):
     if LOGGING:
-        print args
+        string = ' '.join(str(x) for x in args)
+        print string
 
 
 # I think the strategy here should be that this just calls methods in game
@@ -48,34 +49,45 @@ def socketio(request):
             print message
         else:
             print "ERROR: Message wasn't a list of 1 item: ", message
-        if 'game' in message:
+        if 'attack-response' in message:
+            # I hope this works...
+            socketio.broadcast(message)
+        elif 'game' in message:
             game_id = message['game']
             available = get_available_players(game_id)
             socketio.send({'available': available})
         elif 'player' in message:
             player = message['player']
             connect_player(game_id, player)
-            state = get_game_state(game_id)
-            socketio.send({'connected': 'connected', 'state': state})
+            game_state = get_game_state(game_id)
+            socketio.send({'connected': 'connected', 'game-state': game_state})
         elif 'myturn' in message:
             if player == Game.objects.get(pk=game_id).current_player:
-                hand = get_players_hand(game_id, player)
-                state = get_game_state(game_id)
-                message = {'yourturn': 'your turn', 'hand': hand,
-                        'state': state}
+                player_state = get_player_state(game_id, player)
+                game_state = get_game_state(game_id)
+                message = {'yourturn': 'your turn',
+                        'player-state': player_state,
+                        'game-state': game_state}
                 socketio.send(message)
             else:
                 socketio.send({'notyourturn': 'not your turn'})
         elif 'playaction' in message:
             card_num = message['playaction']
             play_action(game_id, player, card_num, socketio)
+            # We don't send anything here, because the action notifies when it
+            # is finished.  Maybe we should change that to be more consistent,
+            # but oh well.
         elif 'buycard' in message:
             cardname = message['buycard']
             buy_card(game_id, player, cardname)
+            socketio.send({'card-bought': 'card bought'})
         elif 'endturn' in message:
             end_turn(game_id, player)
-            state = get_game_state(game_id)
-            message = {'state': state, 'newturn': 'newturn'}
+            game_state = get_game_state(game_id)
+            # TODO: send player's new hand, too, so they can use it to know how
+            # to respond to attacks.  This may obviate the need for the
+            # "myturn" request.
+            message = {'game-state': game_state, 'newturn': 'newturn'}
             socketio.broadcast(message)
             socketio.send(message)
         elif 'val' in message:
@@ -140,16 +152,12 @@ def get_available_players(game_id):
     return available
 
 
-def get_players_hand(game_id, player_num):
-    player = get_player(game_id, player_num)
-    hand = player.get_hand()
-    # We have to make the card objects JSON compatible - the receiving end can
-    # reproduce the card objects from the name
-    return [(c.cardname, c._card_num) for c in hand]
+def get_player_state(game_id, player_num):
+    return PlayerState(game_id, player_num)
 
 
 def get_game_state(game_id):
-    return State(game_id)
+    return GameState(game_id)
 
 
 def play_action(game_id, player_num, card_num, socket):
@@ -175,12 +183,27 @@ def end_turn(game_id, player_num):
     next_player.begin_turn()
 
 
-class State(dict):
+# These objects are what we will be passing along the network to clients, so
+# they are JSON-encodable dictionaries.  Do not try to save anything in here
+# that is not JSON-encodable, or you will crash the socket communication.
+
+class GameState(dict):
     def __init__(self, game_id):
         game = Game.objects.select_related().get(pk=game_id)
         self['current_player'] = game.current_player
         self['cardstacks'] = [(c.cardname, c.num_left) for c in
                 game.cardset.cardstack_set.all()]
+
+
+class PlayerState(dict):
+    def __init__(self, game_id, player_num):
+        player = get_player(game_id, player_num)
+        hand = player.get_hand()
+        self['hand'] = [(c.cardname, c._card_num) for c in hand]
+        # These two pieces of information could be public in GameState instead
+        # of just here in PlayerState, but we'll worry about that later.
+        self['num-actions'] = player.num_actions
+        self['num-buys'] = player.num_buys
 
 
 # vim: et sw=4 sts=4
