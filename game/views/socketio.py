@@ -74,9 +74,7 @@ def socketio(request):
         elif 'playaction' in message:
             card_num = message['playaction']
             play_action(game_id, player, card_num, socketio)
-            # We don't send anything here, because the action notifies when it
-            # is finished.  Maybe we should change that to be more consistent,
-            # but oh well.
+            socketio.send({'action-finished': 'finished'})
         elif 'buycard' in message:
             cardname = message['buycard']
             buy_card(game_id, player, cardname)

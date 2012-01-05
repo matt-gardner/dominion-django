@@ -31,11 +31,7 @@ class Card(object):
         self._is_treasure = False
         self._is_action = False
         self._is_victory = False
-        self._requires_response = False
         self.cardname = None
-
-    def requires_response(self):
-        return self._requires_response
 
     def play_action(self, player, socket):
         raise IllegalActionError("This card has no action")
@@ -197,7 +193,22 @@ class Bureaucrat(ActionCard):
             silver_stack.save()
             player.deck.add_card_to_top_of_deck('Silver')
         # Attack other players
-        raise NotImplementedError()
+        game = player.game
+        response_needed = set()
+        for other in game.get_other_players():
+            response_needed.add(other.player_num)
+        socket.broadcast({'user-action': 'bureaucrat-attacking',
+                'attack': 'ha!'})
+        while response_needed:
+            message = get_message(socket)
+            other = game.player_set.get(player_num=message['player'])
+            if 'moat' not in message:
+                victory_card = message['victory-card']
+                if victory_card != -1:
+                    # We don't currently validate that this is indeed a victory
+                    # card.
+                    other.deck.card_from_hand_to_top_of_deck(victory_card)
+            response_needed.remove(message['player'])
 
 
 class Cellar(ActionCard):
@@ -207,7 +218,6 @@ class Cellar(ActionCard):
         self.cardname = 'Cellar'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         player.num_actions += 1
         # Ask which cards to discard
         socket.send({'user-action': 'discard-any'})
@@ -215,7 +225,6 @@ class Cellar(ActionCard):
         for num in message['discarded']:
             player.discard_card(num)
             player.draw_card()
-        self._requires_response = False
 
 
 class Chancellor(ActionCard):
@@ -225,7 +234,6 @@ class Chancellor(ActionCard):
         self.cardname = 'Chancellor'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         player.coins += 2
         socket.send({'user-action': 'chancellor'})
         message = get_message(socket)
@@ -236,7 +244,6 @@ class Chancellor(ActionCard):
             player.deck.cards_in_deck = ''
             player.deck.cards_in_discard = ' '.join(discard)
             player.deck.save()
-        self._requires_response = False
 
 
 class Chapel(ActionCard):
@@ -246,13 +253,11 @@ class Chapel(ActionCard):
         self.cardname = 'Chapel'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Ask which cards to trash
         socket.send({'user-action': 'trash-any'})
         message = get_message(socket)
         for num in message['trashed']:
             player.trash_card(num)
-        self._requires_response = False
 
 
 class CouncilRoom(ActionCard):
@@ -278,13 +283,11 @@ class Feast(ActionCard):
         self.cardname = 'Feast'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Pick which card to buy
         socket.send({'user-action': 'gain-card-5'})
         message = get_message(socket)
         player.gain_card(message['gained'])
         player.trash_card(self._card_num)
-        self._requires_response = False
 
 
 class Festival(ActionCard):
@@ -318,7 +321,6 @@ class Library(ActionCard):
         self.cardname = 'Library'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         deck = player.deck
         while len(deck.cards_in_hand.split()) < 7:
             card = player.card_from_card_num(deck.draw_card_to_play())
@@ -326,11 +328,10 @@ class Library(ActionCard):
                 # Ask whether to keep card or not
                 socket.send({'user-action': 'library-keep-card'})
                 message = get_message(socket)
-                if message['keep'] == 'yes':
+                if message.get('keep', 'no') != 'yes':
                     continue
             deck.move_card_from_play_to_hand(card._card_num)
             player.coins += card.coins()
-        self._requires_response = False
 
 
 
@@ -356,7 +357,17 @@ class Militia(ActionCard):
     def play_action(self, player, socket):
         player.coins += 2
         # Attack other players
-        raise NotImplementedError()
+        response_needed = set()
+        for other in player.game.get_other_players():
+            response_needed.add(other.player_num)
+        socket.broadcast({'user-action': 'discard-to-three', 'attack': 'ha!'})
+        while response_needed:
+            message = get_message(socket)
+            other = player.game.player_set.get(player_num=message['player'])
+            if 'moat' not in message:
+                for card_num in message['discarded']:
+                    other.discard_card(card_num)
+            response_needed.remove(message['player'])
 
 
 class Mine(ActionCard):
@@ -366,16 +377,15 @@ class Mine(ActionCard):
         self.cardname = 'Mine'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Choose card from hand to upgrade
         socket.send({'user-action': 'trash-treasure'})
         message = get_message(socket)
+        card = player.card_from_card_num(message['trashed'])
         player.trash_card(message['trashed'])
         # Choose card to buy (or do it automatically...)
-        socket.send({'user-action': 'gain-treasure'})
+        socket.send({'user-action': 'gain-treasure-%d' % (card.cost() + 3)})
         message = get_message(socket)
-        player.gain_card(message['gained'])
-        self._requires_response = False
+        player.gain_card_to_hand(message['gained'])
 
 
 class Moat(ActionCard):
@@ -396,14 +406,12 @@ class MoneyLender(ActionCard):
         self.cardname = 'MoneyLender'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Choose copper card to trash
         socket.send({'user-action': 'trash-copper'})
         message = get_message(socket)
         if message['trashed'] != 'None':
             player.trash_card(message['trashed'])
             player.coins += 3
-        self._requires_response = False
 
 
 class Remodel(ActionCard):
@@ -413,7 +421,6 @@ class Remodel(ActionCard):
         self.cardname = 'Remodel'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Pick card from hand to get rid of
         socket.send({'user-action': 'trash-one'})
         message = get_message(socket)
@@ -424,7 +431,6 @@ class Remodel(ActionCard):
         socket.send({'user-action': 'gain-card-%d' % coins})
         message = get_message(socket)
         player.gain_card(message['gained'])
-        self._requires_response = False
 
 
 class Smithy(ActionCard):
@@ -449,7 +455,32 @@ class Spy(ActionCard):
         self.draw_card()
         self.num_actions += 1
         # Attack other players, choose what to do
-        raise NotImplementedError()
+        response_needed = set()
+        for other in player.game.get_other_players():
+            response_needed.add(other.player_num)
+        socket.broadcast({'user-action': 'spy', 'attack': 'ha!'})
+        to_spy_on = set([player])
+        while response_needed:
+            message = get_message(socket)
+            other = game.player_set.get(player_num=message['player'])
+            if 'ok' in message:
+                to_spy_on.add(other)
+            elif 'moat' in message:
+                pass
+            response_needed.remove(message['player'])
+        for p in to_spy_on:
+            card = p.deck.cards_in_deck.split()[0]
+            socket.send({'user-action': 'spying', 'player': p.player_num,
+                    'cardname': p.card_from_card_num(card).cardname})
+            message = get_message(socket)
+            if 'discard' in message:
+                discard = p.deck.cards_in_discard.split()
+                deck = p.deck.cards_in_deck.split()
+                discard.append(deck[0])
+                deck = deck[1:]
+                p.deck.cards_in_discard = ' '.join(discard)
+                p.deck.cards_in_deck = ' '.join(deck)
+                p.deck.save()
 
 
 class Thief(ActionCard):
@@ -459,8 +490,38 @@ class Thief(ActionCard):
         self.cardname = 'Thief'
 
     def play_action(self, player, socket):
+        response_needed = set()
         for other in player.game.get_other_players():
-            raise NotImplementedError()
+            response_needed.add(other.player_num)
+        socket.broadcast({'user-action': 'thief', 'attack': 'ha!'})
+        to_steal_from = set([player])
+        while response_needed:
+            message = get_message(socket)
+            other = game.player_set.get(player_num=message['player'])
+            if 'ok' in message:
+                to_steal_from.add(other)
+            elif 'moat' in message:
+                pass
+            response_needed.remove(message['player'])
+        for p in to_steal_from:
+            # TODO: Not really safe yet if player has 0 or 1 cards in deck
+            cards = [p.card_from_card_num(c)
+                    for c in p.deck.cards_in_deck.split()[0:2]]
+            p.deck.cards_in_deck = ' '.join(deck[0:2])
+            discard = p.deck.cards_in_discard.split()
+            treasure = [c for c in cards if c._is_treasure]
+            not_treasure = [c for c in cards if not c._is_treasure]
+            for c in not_treasure:
+                discard.append(c._card_num)
+            if treasure:
+                socket.send({'user-action': 'stealing', 'player': p.player_num,
+                        'cards': [[c.cardname, c._card_num] for c in treasure]})
+            message = get_message(socket)
+            for c in treasure:
+                if not message.get('trash', -1) == c._card_num:
+                    discard.append(c._card_num)
+            p.deck.cards_in_discard = ' '.join(discard)
+            p.deck.save()
 
 
 class ThroneRoom(ActionCard):
@@ -470,10 +531,8 @@ class ThroneRoom(ActionCard):
         self.cardname = 'ThroneRoom'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         socket.send({'user-action': 'pick-action'})
         message = get_message(socket)
-        self._requires_response = False
         card = player.card_from_card_num(message['picked'])
         card.play_action(player, socket)
         card.play_action(player, socket)
@@ -499,7 +558,19 @@ class Witch(ActionCard):
     def play_action(self, player, socket):
         player.draw_card()
         player.draw_card()
-        raise NotImplementedError()
+        # Give other players a curse.
+        response_needed = set()
+        for other in player.game.get_other_players():
+            response_needed.add(other.player_num)
+        socket.broadcast({'user-action': 'gain-curse', 'attack': 'ha!'})
+        while response_needed:
+            message = get_message(socket)
+            other = game.player_set.get(player_num=message['player'])
+            if 'ok' in message:
+                other.gain_card('Curse')
+            elif 'moat' in message:
+                pass
+            response_needed.remove(message['player'])
 
 
 class Woodcutter(ActionCard):
@@ -520,12 +591,10 @@ class Workshop(ActionCard):
         self.cardname = 'Workshop'
 
     def play_action(self, player, socket):
-        self._requires_response = True
         # Pick which card to buy
         socket.send({'user-action': 'gain-card-4'})
         message = get_message(socket)
         player.gain_card(message['gained'])
-        self._requires_response = False
 
 
 card_from_name = {
