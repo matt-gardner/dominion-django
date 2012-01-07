@@ -64,10 +64,14 @@ class Agent(object):
         elif 'card-bought' in message:
             self.take_turn(ws, self.player_state, self.game_state)
         elif 'user-action' in message:
-            attack = 'attack' in message
+            attack = message.get('attacking-player', None)
             self.handle_action(ws, message, attack)
         elif 'attack-response' in message:
-            pass
+            if message['attacking-player'] == self.player:
+                # Sadly, it seems this convoluted approach is the only way to
+                # get the message to go to the right socket on the server.
+                print 'Forwarding attack response to server'
+                ws.send(message)
         elif 'connected' in message:
             pass
         elif 'newturn' in message:
@@ -133,8 +137,9 @@ class Agent(object):
         # This is because attack actions need to know the player that is
         # responding, and because attack responses need to be forwarded by the
         # server.
-        if attack:
-            message['player'] = self.player
+        if attacking_player:
+            message['responding-player'] = self.player
+            message['attacking-player'] = attacking_player
             message['attack-response'] = 'pues!'
         action = received_message['user-action']
         if 'gain-card-' in action:

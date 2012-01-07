@@ -197,18 +197,19 @@ class Bureaucrat(ActionCard):
         response_needed = set()
         for other in game.get_other_players():
             response_needed.add(other.player_num)
-        socket.broadcast({'user-action': 'bureaucrat-attacking',
-                'attack': 'ha!'})
+        socket.broadcast({'user-action': 'bureaucrat',
+                'attacking-player': player.player_num})
         while response_needed:
             message = get_message(socket)
-            other = game.player_set.get(player_num=message['player'])
+            player_num = message['responding-player']
+            other = player.game.player_set.get(player_num=player_num)
             if 'moat' not in message:
                 victory_card = message['victory-card']
                 if victory_card != -1:
                     # We don't currently validate that this is indeed a victory
                     # card.
                     other.deck.card_from_hand_to_top_of_deck(victory_card)
-            response_needed.remove(message['player'])
+            response_needed.remove(message['responding-player'])
 
 
 class Cellar(ActionCard):
@@ -360,14 +361,16 @@ class Militia(ActionCard):
         response_needed = set()
         for other in player.game.get_other_players():
             response_needed.add(other.player_num)
-        socket.broadcast({'user-action': 'discard-to-three', 'attack': 'ha!'})
+        socket.broadcast({'user-action': 'discard-to-three',
+                'attacking-player': player.player_num})
         while response_needed:
             message = get_message(socket)
-            other = player.game.player_set.get(player_num=message['player'])
+            player_num = message['responding-player']
+            other = player.game.player_set.get(player_num=player_num)
             if 'moat' not in message:
                 for card_num in message['discarded']:
                     other.discard_card(card_num)
-            response_needed.remove(message['player'])
+            response_needed.remove(message['responding-player'])
 
 
 class Mine(ActionCard):
@@ -458,16 +461,18 @@ class Spy(ActionCard):
         response_needed = set()
         for other in player.game.get_other_players():
             response_needed.add(other.player_num)
-        socket.broadcast({'user-action': 'spy', 'attack': 'ha!'})
+        socket.broadcast({'user-action': 'spy',
+                'attacking-player': player.player_num})
         to_spy_on = set([player])
         while response_needed:
             message = get_message(socket)
-            other = game.player_set.get(player_num=message['player'])
+            player_num = message['responding-player']
+            other = player.game.player_set.get(player_num=player_num)
             if 'ok' in message:
                 to_spy_on.add(other)
             elif 'moat' in message:
                 pass
-            response_needed.remove(message['player'])
+            response_needed.remove(message['responding-player'])
         for p in to_spy_on:
             card = p.deck.cards_in_deck.split()[0]
             socket.send({'user-action': 'spying', 'player': p.player_num,
@@ -493,16 +498,18 @@ class Thief(ActionCard):
         response_needed = set()
         for other in player.game.get_other_players():
             response_needed.add(other.player_num)
-        socket.broadcast({'user-action': 'thief', 'attack': 'ha!'})
+        socket.broadcast({'user-action': 'thief',
+                'attacking-player': player.player_num})
         to_steal_from = set([player])
         while response_needed:
             message = get_message(socket)
-            other = game.player_set.get(player_num=message['player'])
+            player_num = message['responding-player']
+            other = player.game.player_set.get(player_num=player_num)
             if 'ok' in message:
                 to_steal_from.add(other)
             elif 'moat' in message:
                 pass
-            response_needed.remove(message['player'])
+            response_needed.remove(message['responding-player'])
         for p in to_steal_from:
             # TODO: Not really safe yet if player has 0 or 1 cards in deck
             cards = [p.card_from_card_num(c)
@@ -562,15 +569,17 @@ class Witch(ActionCard):
         response_needed = set()
         for other in player.game.get_other_players():
             response_needed.add(other.player_num)
-        socket.broadcast({'user-action': 'gain-curse', 'attack': 'ha!'})
+        socket.broadcast({'user-action': 'gain-curse',
+                'attacking-player': player.player_num})
         while response_needed:
             message = get_message(socket)
-            other = game.player_set.get(player_num=message['player'])
+            player_num = message['responding-player']
+            other = player.game.player_set.get(player_num=player_num)
             if 'ok' in message:
                 other.gain_card('Curse')
             elif 'moat' in message:
                 pass
-            response_needed.remove(message['player'])
+            response_needed.remove(message['responding-player'])
 
 
 class Woodcutter(ActionCard):
