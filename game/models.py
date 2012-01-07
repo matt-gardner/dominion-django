@@ -1,5 +1,4 @@
 from django.db import models
-from django.db import transaction
 from random import Random
 
 class Game(models.Model):
@@ -167,7 +166,6 @@ class Player(models.Model):
         cardstack.save()
         self.deck.add_card(cardname)
 
-    @transaction.commit_manually
     def end_turn(self):
         self.coins = 0
         self.deck.discard_cards_in_hand()
@@ -177,7 +175,6 @@ class Player(models.Model):
             self.draw_card()
         self.turn_state = self.TURN_STATES[0][0]
         self.save()
-        transaction.commit()
 
 
 class Deck(models.Model):

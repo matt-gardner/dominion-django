@@ -1,6 +1,20 @@
 #!/usr/bin/env python
 
+# NOTE: This is a modified version of django.db.transaction, to give better
+# error messages.
+import transaction
 from dominion.game.models import Game
+
+
+# TODO: this probably belongs in a more central location
+
+LOGGING = True
+
+def log_info(*args):
+    if LOGGING:
+        string = ' '.join(str(x) for x in args)
+        print string
+
 
 # GAME LOGIC METHODS
 ####################
@@ -47,16 +61,25 @@ def get_game_state(game_id):
     return GameState(game_id)
 
 
+@transaction.commit_manually
 def play_action(game_id, player_num, card_num, socket):
+    # It's possible that committing manually here could have some unintended
+    # consequences, because some actions send messages to players, but I think
+    # that things should still work fine.  I need some more testing to be sure,
+    # though.
     player = get_player(game_id, player_num)
     player.play_action(card_num, socket)
+    transaction.commit()
 
 
+@transaction.commit_manually
 def buy_card(game_id, player_num, cardname):
     player = get_player(game_id, player_num)
     player.buy_card(cardname)
+    transaction.commit()
 
 
+@transaction.commit_manually
 def end_turn(game_id, player_num):
     game = Game.objects.get(pk=game_id)
     current_player = game.current_player
@@ -68,6 +91,7 @@ def end_turn(game_id, player_num):
     player.end_turn()
     next_player = game.player_set.get(player_num=game.current_player)
     next_player.begin_turn()
+    transaction.commit()
 
 
 # These objects are what we will be passing along the network to clients, so
