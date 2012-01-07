@@ -1,5 +1,6 @@
 # Create your views here.
 
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -13,6 +14,7 @@ def main(request):
     return render_to_response('main.html', context)
 
 
+@transaction.commit_manually
 def new_game(request, cardset=None):
     num_players = 2
     game = Game(num_players=num_players)
@@ -34,6 +36,7 @@ def new_game(request, cardset=None):
         game.cardset.cardstack_set.create(cardname=cardname, num_cards=num,
                 num_left=num)
     game.begin_game()
+    transaction.commit()
     return HttpResponseRedirect('/game/%d' % game.id)
 
 
