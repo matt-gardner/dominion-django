@@ -383,9 +383,13 @@ class Mine(ActionCard):
         # Choose card from hand to upgrade
         socket.send({'user-action': 'trash-treasure'})
         message = get_message(socket)
+        if message['trashed'] == -1:
+            return
         card = player.card_from_card_num(message['trashed'])
         player.trash_card(message['trashed'])
         # Choose card to buy (or do it automatically...)
+        # TODO: the message here should make it clear that the card is going to
+        # the hand, as that could affect decision making
         socket.send({'user-action': 'gain-treasure-%d' % (card.cost() + 3)})
         message = get_message(socket)
         player.gain_card_to_hand(message['gained'])
