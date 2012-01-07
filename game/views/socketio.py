@@ -62,6 +62,8 @@ def socketio(request):
             game_state = get_game_state(game_id)
             socketio.send({'connected': 'connected', 'game-state': game_state})
         elif 'myturn' in message:
+            # TODO: this request may not be necessary anymore, because I'm
+            # sending player_state on endturn
             if player == Game.objects.get(pk=game_id).current_player:
                 player_state = get_player_state(game_id, player)
                 game_state = get_game_state(game_id)
@@ -74,21 +76,29 @@ def socketio(request):
         elif 'playaction' in message:
             card_num = message['playaction']
             play_action(game_id, player, card_num, socketio)
-            socketio.send({'action-finished': 'finished'})
+            player_state = get_player_state(game_id, player)
+            socketio.send({'action-finished': 'finished',
+                    'player-state': player_state})
         elif 'buycard' in message:
             cardname = message['buycard']
             buy_card(game_id, player, cardname)
-            socketio.send({'card-bought': 'card bought'})
+            player_state = get_player_state(game_id, player)
+            socketio.send({'card-bought': 'card bought',
+                    'player-state': player_state})
         elif 'endturn' in message:
             end_turn(game_id, player)
             game_state = get_game_state(game_id)
-            # TODO: send player's new hand, too, so they can use it to know how
-            # to respond to attacks.  This may obviate the need for the
-            # "myturn" request.
-            message = {'game-state': game_state, 'newturn': 'newturn'}
+            # Tell everyone else that this turn is over
+            message = {'game-state': game_state,
+                    'newturn': 'newturn'}
             socketio.broadcast(message)
+            # And tell the current player what his new hand is
+            player_state = get_player_state(game_id, player)
+            message['player-state'] = player_state
             socketio.send(message)
         elif 'val' in message:
+            # OLD CODE, from early testing.  Remove this when the web interface
+            # is updated.
             game = Game.objects.get(pk=game_id)
             current_player = game.current_player
             if current_player == player:
@@ -202,6 +212,7 @@ class PlayerState(dict):
         # of just here in PlayerState, but we'll worry about that later.
         self['num-actions'] = player.num_actions
         self['num-buys'] = player.num_buys
+        self['coins'] = player.coins
 
 
 # vim: et sw=4 sts=4

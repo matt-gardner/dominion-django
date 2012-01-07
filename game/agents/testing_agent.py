@@ -60,9 +60,9 @@ class Agent(object):
             game_state = message['game-state']
             self.take_turn(ws, player_state, game_state)
         elif 'action-finished' in message:
-            self.take_turn(ws, self.player_state, self.game_state)
+            self.take_turn(ws, message['player-state'], self.game_state)
         elif 'card-bought' in message:
-            self.take_turn(ws, self.player_state, self.game_state)
+            self.take_turn(ws, message['player-state'], self.game_state)
         elif 'user-action' in message:
             attack = message.get('attacking-player', None)
             self.handle_action(ws, message, attack)
@@ -75,7 +75,10 @@ class Agent(object):
         elif 'connected' in message:
             pass
         elif 'newturn' in message:
-            pass
+            if 'player-state' in message:
+                self.player_state = message['player-state']
+                print 'Got updated player state.  My hand is:'
+                print self.player_state['hand']
         else:
             print "Didn't know how to handle the last message"
 
@@ -101,7 +104,6 @@ class Agent(object):
     def play_action(self, ws, player_state, game_state):
         hand = [get_card_from_name(c[0], c[1]) for c in player_state['hand']]
         actions = [c for c in hand if c._is_action]
-        coin = sum([c.coins() for c in hand])
         if actions:
             action = self.r.choice(actions)
             to_remove = [action.cardname, action._card_num]
@@ -115,20 +117,37 @@ class Agent(object):
             self.buy_card(ws, player_state, game_state)
 
     def buy_card(self, ws, player_state, game_state):
-        hand = [get_card_from_name(c[0], c[1]) for c in player_state['hand']]
-        coin = sum([c.coins() for c in hand])
-        available_cards = get_available_cards(game_state, coin)
-        if available_cards and player_state['num-buys'] > 0:
-            to_buy = self.r.choice(available_cards)
-            print 'buying', to_buy
-            player_state['num-buys'] -= 1
-            # This line may not be necessary, but just in case...
-            self.player_state = player_state
-            ws.send({'buycard': to_buy})
-        else:
+        # For this agent, let's do some really simple stuff.  Only buy cards
+        # that are worth at least 2 (no Copper or Curse).  If you have 3 or 6,
+        # always buy coins, if you have 8, always buy a Province.  Else pick
+        # something good at random.
+        if player_state['num-buys'] == 0:
             ws.send({'endturn': 'end turn'})
+            return
+        hand = [get_card_from_name(c[0], c[1]) for c in player_state['hand']]
+        if player_state['coins'] < 2:
+            ws.send({'endturn': 'end turn'})
+            return
+        elif player_state['coins'] == 3:
+            to_buy = 'Silver'
+        elif player_state['coins'] == 6:
+            to_buy = 'Gold'
+        elif player_state['coins'] == 8:
+            to_buy = 'Province'
+        else:
+            available_cards = get_available_cards(game_state,
+                    player_state['coins'])
+            highest_cost = max(c[0].cost() for c in available_cards)
+            highest_cost_cards = [c for c in available_cards
+                    if c[0].cost() == highest_cost]
+            to_buy = self.r.choice(highest_cost_cards)[1]
+        player_state['num-buys'] -= 1
+        # This line may not be necessary, but just in case...
+        self.player_state = player_state
+        print 'buying', to_buy
+        ws.send({'buycard': to_buy})
 
-    def handle_action(self, ws, received_message, attack):
+    def handle_action(self, ws, received_message, attacking_player):
         game_state = self.game_state
         hand = self.player_state['hand']
         cards_in_hand = [get_card_from_name(c[0], c[1])
@@ -145,7 +164,10 @@ class Agent(object):
         if 'gain-card-' in action:
             max_cost = int(action.split('-')[-1])
             available_cards = get_available_cards(game_state, max_cost)
-            gained = self.r.choice(available_cards)
+            highest_cost = max(c[0].cost() for c in available_cards)
+            highest_cost_cards = [c for c in available_cards
+                    if c[0].cost() == highest_cost]
+            gained = self.r.choice(highest_cost_cards)[1]
             message['gained'] = gained
             ws.send(message)
         elif 'gain-treasure-' in action:
@@ -153,11 +175,12 @@ class Agent(object):
             # TODO: we need some checking in here, to make sure these cards are
             # available
             if max_cost == 3:
-                message['gained'] = 'Silver'
+                gained = 'Silver'
             if max_cost == 6:
-                message['gained'] = 'Gold'
+                gained = 'Gold'
             if max_cost == 9:
-                message['gained'] = 'Platinum'
+                #gained = 'Platinum'
+                gained = 'Gold'
             message['gained'] = gained
             ws.send(message)
         elif action == 'trash-one':
