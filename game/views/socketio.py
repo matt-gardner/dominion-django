@@ -18,14 +18,6 @@ def exception_printer(sender, **kwargs):
 got_request_exception.connect(exception_printer)
 
 
-LOGGING = True
-
-def log_info(*args):
-    if LOGGING:
-        string = ' '.join(str(x) for x in args)
-        print string
-
-
 # I think the strategy here should be that this just calls methods in game
 # logic code depending on what messages it receives.  In the typical
 # model-view-controller framework, this little piece of code is the controller.
