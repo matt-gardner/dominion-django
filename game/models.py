@@ -142,7 +142,10 @@ class Player(models.Model):
         card = get_card_from_name(cardname)
         if self.coins < card.cost():
             raise IllegalActionError("Card costs more money than you have")
+        if self.num_buys == 0:
+            raise IllegalActionError("Player does not have any buys")
         self.coins -= card.cost()
+        self.num_buys -= 1
         self.save()
         cardstack.num_left -= 1
         cardstack.save()
