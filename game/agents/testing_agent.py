@@ -140,6 +140,9 @@ class Agent(object):
             available_cards = get_available_cards(game_state,
                     player_state['coins'])
             highest_cost = max(c[0].cost() for c in available_cards)
+            if highest_cost == 0:
+                ws.send({'endturn': 'end turn'})
+                return
             highest_cost_cards = [c for c in available_cards
                     if c[0].cost() == highest_cost]
             to_buy = self.r.choice(highest_cost_cards)[1]
