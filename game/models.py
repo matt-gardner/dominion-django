@@ -42,6 +42,18 @@ class Game(models.Model):
     def get_other_players(self):
         return self.player_set.exclude(player_num=self.current_player)
 
+    def test_for_finished(self):
+        """Checks whether or not the game is over, sets finished"""
+        provinces = self.cardset.cardstack_set.get(cardname='Province')
+        if provinces.num_left == 0:
+            self.finished = True
+            self.save()
+        else:
+            num_empty = self.cardset.cardstack_set.filter(num_left=0).count()
+            if num_empty >= 3:
+                self.finished = True
+                self.save()
+
 
 class CardSet(models.Model):
     game = models.OneToOneField('Game')

@@ -89,9 +89,12 @@ def end_turn(game_id, player_num):
     game.save()
     player = game.player_set.get(player_num=player_num)
     player.end_turn()
-    next_player = game.player_set.get(player_num=game.current_player)
-    next_player.begin_turn()
+    game.test_for_finished()
+    if not game.finished:
+        next_player = game.player_set.get(player_num=game.current_player)
+        next_player.begin_turn()
     transaction.commit()
+    return game.finished
 
 
 # These objects are what we will be passing along the network to clients, so
@@ -104,6 +107,8 @@ class GameState(dict):
         self['current_player'] = game.current_player
         self['cardstacks'] = [(c.cardname, c.num_left) for c in
                 game.cardset.cardstack_set.all()]
+        if game.finished:
+            self['game-over'] = 'game over!'
 
 
 class PlayerState(dict):

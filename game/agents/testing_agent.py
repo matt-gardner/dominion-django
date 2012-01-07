@@ -54,6 +54,9 @@ class Agent(object):
         if 'available' in message:
             self.player = message['available'][self.available_player]
             ws.send({'player': self.player})
+        elif 'game-over' in message:
+            print 'Game over, closing socket'
+            ws.close()
         elif (('newturn' in message or 'connected' in message) and
                 message['game-state']['current_player'] == self.player):
             ws.send({'myturn': 'info please'})

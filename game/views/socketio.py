@@ -83,16 +83,21 @@ def socketio(request):
             socketio.send({'card-bought': 'card bought',
                     'player-state': player_state})
         elif 'endturn' in message:
-            end_turn(game_id, player)
-            game_state = get_game_state(game_id)
-            # Tell everyone else that this turn is over
-            message = {'game-state': game_state,
-                    'newturn': 'newturn'}
-            socketio.broadcast(message)
-            # And tell the current player what his new hand is
-            player_state = get_player_state(game_id, player)
-            message['player-state'] = player_state
-            socketio.send(message)
+            game_over = end_turn(game_id, player)
+            if game_over:
+                message = {'game-over': 'game over'}
+                socketio.broadcast(message)
+                socketio.send(message)
+            else:
+                game_state = get_game_state(game_id)
+                # Tell everyone else that this turn is over
+                message = {'game-state': game_state,
+                        'newturn': 'newturn'}
+                socketio.broadcast(message)
+                # And tell the current player what his new hand is
+                player_state = get_player_state(game_id, player)
+                message['player-state'] = player_state
+                socketio.send(message)
         elif 'val' in message:
             # OLD CODE, from early testing.  Remove this when the web interface
             # is updated.
