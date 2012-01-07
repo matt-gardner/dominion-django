@@ -18,7 +18,7 @@ from dominion.game.socketio_base import get_message
 def get_available_cards(state, max_cost=50):
     cardstacks = [(get_card_from_name(c[0]), c[0], c[1])
             for c in state['cardstacks']]
-    available_cards = [c[1] for c in cardstacks
+    available_cards = [c[:2] for c in cardstacks
             if c[0].cost() <= max_cost and c[2] > 0]
     return available_cards
 
@@ -48,7 +48,9 @@ class Agent(object):
     # remember things in your code, though, if you want to make correct
     # decisions.
     def on_message(self, ws, message):
+        print
         print 'Message:', message
+        print
         if 'available' in message:
             self.player = message['available'][self.available_player]
             ws.send({'player': self.player})
@@ -193,10 +195,13 @@ class Agent(object):
             ws.send(message)
         elif action == 'trash-treasure':
             treasure = [c for c in cards_in_hand if c._is_treasure]
-            trashed = self.r.choice(treasure)
-            to_remove = [trashed.cardname, trashed._card_num]
-            self.player_state['hand'].remove(to_remove)
-            message['trashed'] = trashed._card_num
+            if not treasure:
+                message['trashed'] = -1
+            else:
+                trashed = self.r.choice(treasure)
+                to_remove = [trashed.cardname, trashed._card_num]
+                self.player_state['hand'].remove(to_remove)
+                message['trashed'] = trashed._card_num
             ws.send(message)
         elif action == 'pick-action':
             actions = [c for c in cards_in_hand if c._is_action]
@@ -215,10 +220,14 @@ class Agent(object):
             message['discarded'] = [d[1] for d in discarded]
             ws.send(message)
         elif action == 'discard-to-three':
+            print 'Hand is currently:'
+            print self.player_state['hand']
             discarded = self.player_state['hand'][3:]
             for d in discarded:
                 self.player_state['hand'].remove(d)
             message['discarded'] = [d[1] for d in discarded]
+            print 'After discard, hand is:'
+            print self.player_state['hand']
             print 'sending message:', message
             ws.send(message)
         elif action == 'chancellor':
