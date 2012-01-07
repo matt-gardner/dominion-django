@@ -167,6 +167,7 @@ class Player(models.Model):
         self.deck.add_card(cardname)
 
     def end_turn(self):
+        self.coins = 0
         self.deck.discard_cards_in_hand()
         self.deck.discard_cards_in_play()
         self.deck.discard_active_cards_in_play()
