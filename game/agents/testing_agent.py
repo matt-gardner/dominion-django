@@ -54,25 +54,29 @@ class Agent(object):
         if 'available' in message:
             self.player = message['available'][self.available_player]
             ws.send({'player': self.player})
-        elif 'game-over' in message:
+        elif 'game_over' in message:
             print 'Game over, closing socket'
             ws.close()
-        elif (('newturn' in message or 'connected' in message) and
-                message['game-state']['current_player'] == self.player):
-            ws.send({'myturn': 'info please'})
-        elif 'yourturn' in message:
-            player_state = message['player-state']
-            game_state = message['game-state']
-            self.take_turn(ws, player_state, game_state)
-        elif 'action-finished' in message:
-            self.take_turn(ws, message['player-state'], self.game_state)
-        elif 'card-bought' in message:
-            self.take_turn(ws, message['player-state'], self.game_state)
-        elif 'user-action' in message:
-            attack = message.get('attacking-player', None)
+        elif 'newturn' in message or 'connected' in message:
+            # TODO: these messages are ugly; clean up the protocol a bit
+            if 'player_state' in message:
+                self.player_state = message['player_state']
+            if message['game_state']['current_player'] == self.player:
+                try:
+                    old_player_state = self.player_state
+                except AttributeError:
+                    old_player_state = None
+                player_state = message.get('player_state', old_player_state)
+                self.take_turn(ws, player_state, message['game_state'])
+        elif 'action_finished' in message:
+            self.take_turn(ws, message['player_state'], message['game_state'])
+        elif 'card_bought' in message:
+            self.take_turn(ws, message['player_state'], message['game_state'])
+        elif 'user_action' in message:
+            attack = message.get('attacking_player', None)
             self.handle_action(ws, message, attack)
-        elif 'attack-response' in message:
-            if message['attacking-player'] == self.player:
+        elif 'attack_response' in message:
+            if message['attacking_player'] == self.player:
                 # Sadly, it seems this convoluted approach is the only way to
                 # get the message to go to the right socket on the server.
                 print 'Forwarding attack response to server'
@@ -80,8 +84,8 @@ class Agent(object):
         elif 'connected' in message:
             pass
         elif 'newturn' in message:
-            if 'player-state' in message:
-                self.player_state = message['player-state']
+            if 'player_state' in message:
+                self.player_state = message['player_state']
                 print 'Got updated player state.  My hand is:'
                 print self.player_state['hand']
         else:
@@ -99,9 +103,10 @@ class Agent(object):
         # driven.
         self.player_state = player_state
         self.game_state = game_state
-        if player_state['num-actions'] > 0:
+        if (game_state['current_player_actions'] > 0 and
+                game_state['current_player_state'] == 'ACTIONS'):
             self.play_action(ws, player_state, game_state)
-        elif player_state['num-buys'] > 0:
+        elif game_state['current_player_buys'] > 0:
             self.buy_card(ws, player_state, game_state)
         else:
             ws.send({'endturn': 'end turn'})
@@ -113,10 +118,12 @@ class Agent(object):
             action = self.r.choice(actions)
             to_remove = [action.cardname, action._card_num]
             print 'playing action', action.cardname
+            # I don't think these four lines are necessary anymore, but I need
+            # to write some tests to be sure before I remove them.
             player_state['hand'].remove(to_remove)
-            player_state['num-actions'] -= 1
-            # This line may not be necessary, but just in case...
+            game_state['current_player_actions'] -= 1
             self.player_state = player_state
+            self.game_state = game_state
             ws.send({'playaction': action._card_num})
         else:
             self.buy_card(ws, player_state, game_state)
@@ -126,22 +133,22 @@ class Agent(object):
         # that are worth at least 2 (no Copper or Curse).  If you have 3 or 6,
         # always buy coins, if you have 8, always buy a Province.  Else pick
         # something good at random.
-        if player_state['num-buys'] == 0:
+        if game_state['current_player_buys'] == 0:
             ws.send({'endturn': 'end turn'})
             return
         hand = [get_card_from_name(c[0], c[1]) for c in player_state['hand']]
-        if player_state['coins'] < 2:
+        coins = game_state['current_player_coins']
+        if coins < 2:
             ws.send({'endturn': 'end turn'})
             return
-        elif player_state['coins'] == 3:
+        elif coins == 3:
             to_buy = 'Silver'
-        elif player_state['coins'] == 6:
+        elif coins == 6:
             to_buy = 'Gold'
-        elif player_state['coins'] == 8:
+        elif coins == 8:
             to_buy = 'Province'
         else:
-            available_cards = get_available_cards(game_state,
-                    player_state['coins'])
+            available_cards = get_available_cards(game_state, coins)
             highest_cost = max(c[0].cost() for c in available_cards)
             if highest_cost == 0:
                 ws.send({'endturn': 'end turn'})
@@ -149,9 +156,10 @@ class Agent(object):
             highest_cost_cards = [c for c in available_cards
                     if c[0].cost() == highest_cost]
             to_buy = self.r.choice(highest_cost_cards)[1]
-        player_state['num-buys'] -= 1
-        # This line may not be necessary, but just in case...
-        self.player_state = player_state
+        # I don't think these two lines are necessary anymore, but I need to
+        # write some tests to be sure before I remove them.
+        game_state['current_player_buys'] -= 1
+        self.game_state = game_state
         print 'buying', to_buy
         ws.send({'buycard': to_buy})
 
@@ -165,12 +173,12 @@ class Agent(object):
         # responding, and because attack responses need to be forwarded by the
         # server.
         if attacking_player:
-            message['responding-player'] = self.player
-            message['attacking-player'] = attacking_player
-            message['attack-response'] = 'pues!'
-        action = received_message['user-action']
-        if 'gain-card-' in action:
-            max_cost = int(action.split('-')[-1])
+            message['responding_player'] = self.player
+            message['attacking_player'] = attacking_player
+            message['attack_response'] = 'pues!'
+        action = received_message['user_action']
+        if 'gain_card_' in action:
+            max_cost = int(action.split('_')[-1])
             available_cards = get_available_cards(game_state, max_cost)
             highest_cost = max(c[0].cost() for c in available_cards)
             highest_cost_cards = [c for c in available_cards
@@ -178,8 +186,8 @@ class Agent(object):
             gained = self.r.choice(highest_cost_cards)[1]
             message['gained'] = gained
             ws.send(message)
-        elif 'gain-treasure-' in action:
-            max_cost = int(action.split('-')[-1])
+        elif 'gain_treasure_' in action:
+            max_cost = int(action.split('_')[-1])
             # TODO: we need some checking in here, to make sure these cards are
             # available
             if max_cost == 3:
@@ -191,15 +199,15 @@ class Agent(object):
                 gained = 'Gold'
             message['gained'] = gained
             ws.send(message)
-        elif action == 'trash-one':
+        elif action == 'trash_one':
             trashed = self.r.choice(hand)
             self.player_state['hand'].remove(trashed)
             message['trashed'] = trashed[1]
             ws.send(message)
-        elif action == 'trash-any':
+        elif action == 'trash_any':
             message['trashed'] = []
             ws.send(message)
-        elif action == 'trash-treasure':
+        elif action == 'trash_treasure':
             treasure = [c for c in cards_in_hand if c._is_treasure]
             if not treasure:
                 message['trashed'] = -1
@@ -209,23 +217,23 @@ class Agent(object):
                 self.player_state['hand'].remove(to_remove)
                 message['trashed'] = trashed._card_num
             ws.send(message)
-        elif action == 'pick-action':
+        elif action == 'pick_action':
             actions = [c for c in cards_in_hand if c._is_action]
             message['gained'] = self.r.choice(actions).card_num
             ws.send(message)
-        elif action == 'library-keep-card':
+        elif action == 'library_keep_card':
             message['keep'] = 'yes'
             ws.send(message)
-        elif action == 'discard-any':
+        elif action == 'discard_any':
             message['discarded'] = []
             ws.send(message)
-        elif action == 'discard-two':
+        elif action == 'discard_two':
             discarded = self.hand[:2]
             for d in discarded:
                 self.player_state['hand'].remove(d)
             message['discarded'] = [d[1] for d in discarded]
             ws.send(message)
-        elif action == 'discard-to-three':
+        elif action == 'discard_to_three':
             print 'Hand is currently:'
             print self.player_state['hand']
             discarded = self.player_state['hand'][3:]
@@ -239,7 +247,7 @@ class Agent(object):
         elif action == 'chancellor':
             message['reshuffle'] = 'yes'
             ws.send(message)
-        elif action == 'gain-curse':
+        elif action == 'gain_curse':
             message['ok'] = 'curse you!'
             ws.send(message)
         elif action == 'spy':
@@ -254,12 +262,12 @@ class Agent(object):
         elif action == 'stealing':
             message['trash'] = received_message['cards'][0][1]
             ws.send(message)
-        elif action == 'bureaucrat-attacking':
+        elif action == 'bureaucrat_attacking':
             victory_cards = [c for c in cards_in_hand if c._is_victory]
             if not victory_cards:
-                message['victory-card'] = -1
+                message['victory_card'] = -1
             else:
-                message['victory-card'] = victory_cards[0]._card_num
+                message['victory_card'] = victory_cards[0]._card_num
             ws.send(message)
         else:
             raise ValueError("I don't know how to respond to this action: %s"

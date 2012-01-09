@@ -46,7 +46,7 @@ def socketio(request):
             start = datetime.now()
         else:
             print "ERROR: Message wasn't a list of 1 item: ", message
-        if 'attack-response' in message:
+        if 'attack_response' in message:
             # I hope this works...
             socketio.broadcast(message)
         elif 'game' in message:
@@ -57,47 +57,43 @@ def socketio(request):
             player = message['player']
             connect_player(game_id, player)
             game_state = get_game_state(game_id)
-            socketio.send({'connected': 'connected', 'game-state': game_state})
-        elif 'myturn' in message:
-            # TODO: this request may not be necessary anymore, because I'm
-            # sending player_state on endturn
-            if player == Game.objects.get(pk=game_id).current_player:
-                player_state = get_player_state(game_id, player)
-                game_state = get_game_state(game_id)
-                message = {'yourturn': 'your turn',
-                        'player-state': player_state,
-                        'game-state': game_state}
-                socketio.send(message)
-            else:
-                socketio.send({'notyourturn': 'not your turn'})
+            player_state = get_player_state(game_id, player)
+            socketio.send({'connected': 'connected', 'game_state': game_state,
+                    'player_state': player_state})
         elif 'playaction' in message:
             card_num = message['playaction']
             play_action(game_id, player, card_num, socketio)
+            game_state = get_game_state(game_id)
             player_state = get_player_state(game_id, player)
-            socketio.send({'action-finished': 'finished',
-                    'player-state': player_state})
+            socketio.send({'action_finished': 'finished',
+                    'player_state': player_state,
+                    'game_state': game_state})
         elif 'buycard' in message:
             cardname = message['buycard']
             buy_card(game_id, player, cardname)
+            game_state = get_game_state(game_id)
             player_state = get_player_state(game_id, player)
-            socketio.send({'card-bought': 'card bought',
-                    'player-state': player_state})
+            socketio.send({'card_bought': 'card bought',
+                    'game_state': game_state,
+                    'player_state': player_state})
         elif 'endturn' in message:
             game_over = end_turn(game_id, player)
             if game_over:
-                message = {'game-over': 'game over'}
+                message = {'game_over': 'game over'}
                 socketio.broadcast(message)
                 socketio.send(message)
             else:
                 game_state = get_game_state(game_id)
                 # Tell everyone else that this turn is over
-                message = {'game-state': game_state,
+                message = {'game_state': game_state,
                         'newturn': 'newturn'}
                 socketio.broadcast(message)
                 # And tell the current player what his new hand is
                 player_state = get_player_state(game_id, player)
-                message['player-state'] = player_state
-                socketio.send(message)
+                player_message = dict()
+                player_message.update(message)
+                player_message['player_state'] = player_state
+                socketio.send(player_message)
         elif 'val' in message:
             # OLD CODE, from early testing.  Remove this when the web interface
             # is updated.
