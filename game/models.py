@@ -97,6 +97,15 @@ class Player(models.Model):
     def get_hand(self):
         return self.deck.get_cards_in_hand()
 
+    def num_cards_in_hand(self):
+        return len(self.deck.cards_in_hand.split())
+
+    def num_cards_in_discard(self):
+        return len(self.deck.cards_in_discard.split())
+
+    def num_cards_in_deck(self):
+        return len(self.deck.cards_in_deck.split())
+
     def get_card_from_hand(self, card_num):
         hand = self.deck.cards_in_hand.split()
         if card_num not in hand:
