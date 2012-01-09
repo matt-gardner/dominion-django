@@ -184,6 +184,9 @@ class _Dispatcher(asyncore.dispatcher):
 
     def _handle_frame(self, frame):
         if frame[-1] != '\xff':
+            # These two error messages probably mean that the messages were
+            # closer together than the server could handle.  It's not very good
+            # with concurrent messaging.
             raise WebSocketError("Frame didn't end right")
         if frame[0] != '\x00':
             raise WebSocketError("Frame didn't begin right")
