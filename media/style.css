@@ -1,43 +1,229 @@
-#main {
-    height: 300px;
+#board {
+    background: #a0a0a0;
+    height: 800px;
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Card style rules */
+
+.cardwrapper {
+    height: 80px;
+    width: 80px;
+    background: #000000;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.card {
+    height: 70px;
+    width: 70px;
+    background: #ffffff;
+    margin: 5px 5px 5px 5px;
+    text-align: center;
+    letter-spacing: normal;
+}
+
+.tallcardwrapper {
+    height: 110px;
+    width: 85px;
+    background: #000000;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.tallcard {
+    height: 100px;
+    width: 75px;
+    background: #ffffff;
+    margin: 5px 5px 5px 5px;
+    text-align: center;
+    letter-spacing: normal;
+}
+
+/* Style rules for the top row: the card stacks */
+
+#top {
+    background: #ff0000;
+    height: 240px;
+}
+#cardstacks {
+    background: #006600;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 30px;
+}
+#basic_cards {
+    background: #f600f6;
+    width: 50%;
+    float: left;
+}
+#victory_cards {
+    background: #00f6f6;
+    height: 80px;
+    border: 1px;
+}
+#treasure_cards {
+    background: #f0f0f0;
+    height: 80px;
+    border: 1px;
+}
+#curse_and_trash {
+    background: #060606;
+    height: 80px;
+    border: 1px;
+}
+#kingdom_cards {
+    background: #00aa00;
+    width: 50%;
+    float: left;
+}
+#kingdom_row1 {
+    background: #f0f000;
+    height: 80px;
+    border: 1px;
+}
+#kingdom_row2 {
+    background: #ff00f0;
+    height: 80px;
+    border: 1px;
+}
+#kingdom_row3 {
+    background: #00ffb0;
+    height: 80px;
+    border: 1px;
+}
+
+/* Style rules for the middle row: play area and other player info */
+
+#middle {
+    background: #0000ff;
+    height: 390px;
+}
+#play_area {
+    background: #aa5500;
+    float: left;
+    width: 60%;
+}
+#turn_info {
+    background: #00aa55;
+    height: 70px;
+}
+#cards_in_play {
+    background: #aa0055;
+    height: 320px;
+}
+#actions {
+    background: #55aa00;
+    float: left;
+    height: 320px;
+    width: 38%;
+}
+#treasures {
+    background: #0055aa;
+    float: left;
+    height: 320px;
+    width: 38%;
+}
+#bought {
+    background: #0a5f33;
+    float: left;
+    height: 320px;
+    width: 24%;
+}
+#other_players {
+    background: #f32a4d;
+    width: 40%;
+    float: left;
+}
+#other_player1 {
+    background: #048910;
+    height: 130px;
+}
+#other_player2 {
+    background: #abcd00;
+    height: 130px;
+}
+#other_player3 {
+    background: #f6f6f6;
+    height: 130px;
+}
+
+.playercardwrapper {
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 8px;
+}
+.player_info {
+    height: 120px;
+    width: 110px;
+    background: #ffffff;
+    float: left;
+    text-align: center;
+    margin: 5px;
+}
+
+/* Style rules for the bottom row: player hand and deck */
+
+#bottom {
+    background: #00ff00;
+    height: 170px;
+}
+#deck {
+    background: #ff0000;
+    float: left;
+    width: 120px;
+    height: 100%;
+}
+#deckwrapper {
+    height: 120px;
+    width: 80px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+#deckwrapper .tallcardwrapper {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+#discard {
+    background: #0000ff;
+    float: left;
+    width: 120px;
+    height: 100%;
+}
+#discardwrapper {
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-top: 25px;
+    margin-bottom: 25px;
+}
+#discardwrapper .tallcardwrapper {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+#hand {
+    background: #ffff00;
+    float: left;
+    height: 100%;
+    width: 760px;
     overflow: auto;
-    width: 800px;
-    border: 1px solid #eee;
-    font: 13px Helvetica, Arial;
 }
-#main p {
-    padding: 8px;
-    margin: 0;
+#handwrapper {
+    height: 80px;
+    margin-top: 45px;
+    margin-left: 40px;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 8px;
 }
-#main p:nth-child(odd) {
-    background: #F6F6F6;
-}
-#form {
-    width: 782px;
-    background: #333;
-    padding: 5px 10px;
-    display: none;
-}
-#form input[type=text] {
-    width: 700px;
-    padding: 5px;
-    background: #fff;
-    border: 1px solid #fff;
-}
-#form input[type=submit] {
-    cursor: pointer;
-    background: #999;
-    border: none;
-    padding: 6px 8px;
-    -moz-border-radius: 8px;
-    -webkit-border-radius: 8px;
-    margin-left: 5px;
-    text-shadow: 0 1px 0 #fff;
-}
-#form input[type=submit]:hover {
-    background: #A2A2A2;
-}
-#form input[type=submit]:active {
-    position: relative;
-    top: 2px;
-}
+
+
+
+

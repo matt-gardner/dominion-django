@@ -23,11 +23,257 @@
   </head>
   <body>
 
-    <h1>Sample main client</h1>
-    <div id="main"><p>Connecting...</p></div>
-    <form id="form" onsubmit="send(); return false">
-      <input type="submit" value="+1">
-    </form>
+    <div id="board">
+      <div id="top">
+        <div id="cardstacks">
+          <div id="basic_cards">
+            <div id="victory_cards">
+              <div class="cardwrapper">
+                <div class="card">
+                  Estate
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Duchy
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Province
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Colony
+                </div>
+              </div>
+            </div>
+            <div id="treasure_cards">
+              <div class="cardwrapper">
+                <div class="card">
+                  Copper
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Silver
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Gold
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Platinum
+                </div>
+              </div>
+            </div>
+            <div id="curse_and_trash">
+              <div class="cardwrapper">
+                <div class="card">
+                  Curse
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                  Trash
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="kingdom_cards">
+            <div id="kingdom_row1">
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+            </div>
+            <div id="kingdom_row2">
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+            </div>
+            <div id="kingdom_row3">
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+              <div class="cardwrapper">
+                <div class="card">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="middle">
+        <div id="play_area">
+          <div id="turn_info">
+          </div>
+          <div id="cards_in_play">
+            <div id="actions">
+            </div>
+            <div id="treasures">
+            </div>
+            <div id="bought">
+            </div>
+          </div>
+        </div>
+        <div id="other_players">
+          <div id="other_player1">
+            <div class="player_info">
+              Name
+            </div>
+            <div class="playercardwrapper">
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="other_player2">
+            <div class="player_info">
+              Name
+            </div>
+            <div class="playercardwrapper">
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Hand
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Deck
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Discard
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="other_player3">
+            <div class="player_info">
+              Name
+            </div>
+            <div class="playercardwrapper">
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Hand
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Deck
+                </div>
+              </div>
+              <div class="tallcardwrapper">
+                <div class="tallcard">
+                  Discard
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="bottom">
+        <div id="deck">
+          <div id="deckwrapper">
+            <div class="tallcardwrapper">
+              <div class="tallcard">
+                Deck
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="discard">
+          <div id="discardwrapper">
+            <div class="tallcardwrapper">
+              <div class="tallcard">
+                Discard
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="hand">
+          <div id="handwrapper">
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+            <div class="cardwrapper">
+              <div class="card">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </body>
 </html>
