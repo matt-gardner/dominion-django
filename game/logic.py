@@ -39,6 +39,7 @@ def connect_player(game_id, player_num):
 
 
 def disconnect_player(game_id, player_num):
+    print 'disconneting player', player_num, 'from game', game_id
     player = get_player(game_id, player_num)
     player.connected = False
     player.save()
