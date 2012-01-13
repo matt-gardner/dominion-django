@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>socket.io client test</title>
+    <title>Dominion</title>
 
     <link rel="stylesheet" title="default" href="/media/style.css"
         type="text/css" />
@@ -14,7 +14,8 @@
 {% block script_config %}
 <script charset="utf-8" type="text/javascript">
     $.fn.game_config = function() {};
-    $.fn.game_config.game = {{ game }};
+    $.fn.game_config.game = {{ game.id }};
+    $.fn.game_config.player_num = {{ player.player_num }};
     $.fn.socket_config = function() {};
     $.fn.socket_config.port = {{ request.environ.SERVER_PORT|default:"9000" }};
 </script>
@@ -29,57 +30,67 @@
           <div id="basic_cards">
             <div id="victory_cards" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
-                  Estate
+                <div class="card" id="Estate">
+                  <span class="cardname">Estate</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Duchy
+                <div class="card" id="Duchy">
+                  <span class="cardname">Duchy</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Province
+                <div class="card" id="Province">
+                  <span class="cardname">Province</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Colony
+                <div class="card" id="Colony">
+                  <span class="cardname">Colony</span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
             <div id="treasure_cards" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
-                  Copper
+                <div class="card" id="Copper">
+                  <span class="cardname">Copper</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Silver
+                <div class="card" id="Silver">
+                  <span class="cardname">Silver</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Gold
+                <div class="card" id="Gold">
+                  <span class="cardname">Gold</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Platinum
+                <div class="card" id="Platinum">
+                  <span class="cardname">Platinum</span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
             <div id="curse_and_trash" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
-                  Curse
+                <div class="card" id="Curse">
+                  <span class="cardname">Curse</span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
-                  Trash
+                <div class="card" id="Trash">
+                  <span class="cardname">Trash</span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
@@ -87,47 +98,67 @@
           <div id="kingdom_cards">
             <div id="kingdom_row1" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard1">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard2">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard3">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
             <div id="kingdom_row2" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard4">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard5">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard6">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
             <div id="kingdom_row3" class="cardrow">
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard7">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard8">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard9">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
               <div class="cardwrapper">
-                <div class="card">
+                <div class="card" id="kcard10">
+                  <span class="cardname"></span>
+                  <span class="left"></span>
                 </div>
               </div>
             </div>
