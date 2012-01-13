@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <link rel="stylesheet" title="default" href="/media/style.css"
+        type="text/css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"
+        type="text/javascript"></script>
+    <script src="/media/json.js"></script>
+    <script src="/media/sockets.js"></script>
+    <script src="http://cdn.socket.io/stable/socket.io.js"></script>
+
+{% block script_config %}
+<script charset="utf-8" type="text/javascript">
+    $.fn.game_config = function() {};
+    $.fn.game_config.game = {{ game.id }};
+    $.fn.game_config.player_num = -1;
+    $.fn.socket_config = function() {};
+    $.fn.socket_config.port = {{ request.environ.SERVER_PORT|default:"9000" }};
+</script>
+{% endblock %}
+
+  </head>
+  <body>
+    <div id="main"><p>Connecting to {{ game.name }}</p></div>
+  </body>
+</html>

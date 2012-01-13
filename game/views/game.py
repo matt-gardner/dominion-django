@@ -20,7 +20,7 @@ def new_game(request, cardset=None):
     game = Game(num_players=num_players)
     game.save()
     for i in range(1, num_players+1):
-        game.player_set.create(player_num=i)
+        game.player_set.create(player_num=i, name='Player %d' % i)
         player = game.player_set.get(player_num=i)
         player.deck = Deck()
         player.deck.save()
@@ -40,7 +40,16 @@ def new_game(request, cardset=None):
     return HttpResponseRedirect('/game/%d' % game.id)
 
 
-def play(request, game):
+def pick_player(request, game):
     context = RequestContext(request)
+    game = Game.objects.get(pk=game)
     context['game'] = game
+    return render_to_response('pick_player.html', context)
+
+def play(request, game, player):
+    context = RequestContext(request)
+    game = Game.objects.get(pk=game)
+    context['game'] = game
+    player = game.player_set.get(player_num=player)
+    context['player'] = player
     return render_to_response('play.html', context)
