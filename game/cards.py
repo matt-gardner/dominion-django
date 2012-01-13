@@ -127,6 +127,9 @@ class Estate(VictoryCard):
         self._victory_points = 1
         self.cardname = 'Estate'
 
+    def starting_stack_size(self, num_players):
+        return 24
+
 
 class Duchy(VictoryCard):
     def __init__(self, card_num):
