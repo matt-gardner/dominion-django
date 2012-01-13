@@ -33,9 +33,10 @@ def socketio(request):
         message = socketio.recv()
 
         if not socketio.connected():
-            disconnect_player(game_id, player)
-            socketio.broadcast({'announcement':
-                    socketio.session.session_id + ' disconnected'})
+            if player:
+                disconnect_player(game_id, player)
+                socketio.broadcast({'announcement':
+                        socketio.session.session_id + ' disconnected'})
             break
         if len(message) == 0:
             # Probably a heartbeat message - move along
