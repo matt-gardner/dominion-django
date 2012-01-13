@@ -27,7 +27,7 @@
       <div id="top">
         <div id="cardstacks">
           <div id="basic_cards">
-            <div id="victory_cards">
+            <div id="victory_cards" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                   Estate
@@ -49,7 +49,7 @@
                 </div>
               </div>
             </div>
-            <div id="treasure_cards">
+            <div id="treasure_cards" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                   Copper
@@ -71,7 +71,7 @@
                 </div>
               </div>
             </div>
-            <div id="curse_and_trash">
+            <div id="curse_and_trash" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                   Curse
@@ -85,7 +85,7 @@
             </div>
           </div>
           <div id="kingdom_cards">
-            <div id="kingdom_row1">
+            <div id="kingdom_row1" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                 </div>
@@ -99,7 +99,7 @@
                 </div>
               </div>
             </div>
-            <div id="kingdom_row2">
+            <div id="kingdom_row2" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                 </div>
@@ -113,7 +113,7 @@
                 </div>
               </div>
             </div>
-            <div id="kingdom_row3">
+            <div id="kingdom_row3" class="cardrow">
               <div class="cardwrapper">
                 <div class="card">
                 </div>
@@ -137,13 +137,158 @@
       <div id="middle">
         <div id="play_area">
           <div id="turn_info">
+            <p>Matt's turn</p>
+            <p>
+            Actions: <span id="num_actions">1</span>
+            Buys: <span id="num_buys">1</span>
+            Coins: <span id="num_coins">0</span>
+            </p>
           </div>
           <div id="cards_in_play">
             <div id="actions">
+              <div id="action_title" class="in_play_title">
+                Actions Played
+              </div>
+              <div id="actions_played" class="cards_in_play">
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div id="treasures">
+              <div id="treasure_title" class="in_play_title">
+                Treasure Played
+              </div>
+              <div id="treasures_played" class="cards_in_play">
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div id="bought">
+              <div id="bought_title" class="in_play_title">
+                Cards Bought
+              </div>
+              <div id="cards_bought" class="cards_in_play">
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+                <div class="cardrow">
+                  <div class="cardwrapper">
+                    <div class="card">
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -152,7 +297,7 @@
             <div class="player_info">
               Name
             </div>
-            <div class="playercardwrapper">
+            <div class="playercardwrapper" class="cardrow">
               <div class="tallcardwrapper">
                 <div class="tallcard">
                 </div>
@@ -171,7 +316,7 @@
             <div class="player_info">
               Name
             </div>
-            <div class="playercardwrapper">
+            <div class="playercardwrapper" class="cardrow">
               <div class="tallcardwrapper">
                 <div class="tallcard">
                   Hand
@@ -193,7 +338,7 @@
             <div class="player_info">
               Name
             </div>
-            <div class="playercardwrapper">
+            <div class="playercardwrapper" class="cardrow">
               <div class="tallcardwrapper">
                 <div class="tallcard">
                   Hand
@@ -215,7 +360,7 @@
       </div>
       <div id="bottom">
         <div id="deck">
-          <div id="deckwrapper">
+          <div id="deckwrapper" class="cardrow">
             <div class="tallcardwrapper">
               <div class="tallcard">
                 Deck
@@ -224,7 +369,7 @@
           </div>
         </div>
         <div id="discard">
-          <div id="discardwrapper">
+          <div id="discardwrapper" class="cardrow">
             <div class="tallcardwrapper">
               <div class="tallcard">
                 Discard
@@ -233,7 +378,7 @@
           </div>
         </div>
         <div id="hand">
-          <div id="handwrapper">
+          <div id="handwrapper" class="cardrow">
             <div class="cardwrapper">
               <div class="card">
               </div>
@@ -274,6 +419,5 @@
         </div>
       </div>
     </div>
-
   </body>
 </html>

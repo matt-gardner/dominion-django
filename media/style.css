@@ -27,23 +27,28 @@
 }
 
 .tallcardwrapper {
-    height: 110px;
-    width: 85px;
+    height: 120px;
+    width: 80px;
     background: #000000;
     display: inline-block;
     margin-left: auto;
     margin-right: auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .tallcard {
-    height: 100px;
-    width: 75px;
+    height: 110px;
+    width: 70px;
     background: #ffffff;
     margin: 5px 5px 5px 5px;
     text-align: center;
     letter-spacing: normal;
+}
+
+.cardrow {
+    text-align: center;
+    white-space: nowrap;
 }
 
 /* Style rules for the top row: the card stacks */
@@ -54,8 +59,6 @@
 }
 #cardstacks {
     background: #006600;
-    text-align: center;
-    white-space: nowrap;
     letter-spacing: 30px;
 }
 #basic_cards {
@@ -112,30 +115,46 @@
 }
 #turn_info {
     background: #00aa55;
-    height: 70px;
+    height: 50px;
+    text-align: center;
+}
+#turn_info p {
+    margin: 0px;
 }
 #cards_in_play {
     background: #aa0055;
-    height: 320px;
+    height: 310px;
 }
 #actions {
     background: #55aa00;
     float: left;
-    height: 320px;
+    height: 340px;
     width: 38%;
 }
 #treasures {
     background: #0055aa;
     float: left;
-    height: 320px;
+    height: 340px;
     width: 38%;
 }
 #bought {
     background: #0a5f33;
     float: left;
-    height: 320px;
+    height: 340px;
     width: 24%;
 }
+.in_play_title {
+    text-align: center;
+    font-weight: bold;
+    background: #bb00ff;
+    height: 30px;
+}
+.cards_in_play {
+    overflow: auto;
+    height: 310px;
+}
+
+
 #other_players {
     background: #f32a4d;
     width: 40%;
@@ -155,9 +174,9 @@
 }
 
 .playercardwrapper {
-    text-align: center;
-    white-space: nowrap;
     letter-spacing: 8px;
+    /* Not sure why this needs to be so big, but that's what works */
+    margin-left: 125px;
 }
 .player_info {
     height: 120px;
@@ -219,8 +238,6 @@
     height: 80px;
     margin-top: 45px;
     margin-left: 40px;
-    text-align: center;
-    white-space: nowrap;
     letter-spacing: 8px;
 }
 
