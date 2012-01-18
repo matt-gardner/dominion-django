@@ -1,7 +1,7 @@
 #board {
     background: #a0a0a0;
     height: 800px;
-    width: 1000px;
+    width: 1100px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -9,8 +9,8 @@
 /* Card style rules */
 
 .cardwrapper {
-    height: 80px;
-    width: 80px;
+    height: 100px;
+    width: 108px;
     background: #000000;
     display: inline-block;
     margin-left: auto;
@@ -18,16 +18,16 @@
 }
 
 .card {
-    height: 70px;
-    width: 70px;
+    height: 90px;
+    width: 108px;
     background: #ffffff;
-    margin: 5px 5px 5px 5px;
+    margin: 5px 5px 0px 0px;
     text-align: center;
     letter-spacing: normal;
 }
 
 .tallcardwrapper {
-    height: 120px;
+    height: 100px;
     width: 80px;
     background: #000000;
     display: inline-block;
@@ -38,7 +38,7 @@
 }
 
 .tallcard {
-    height: 110px;
+    height: 90px;
     width: 70px;
     background: #ffffff;
     margin: 5px 5px 5px 5px;
@@ -55,7 +55,7 @@
 
 #top {
     background: #ff0000;
-    height: 240px;
+    height: 300px;
 }
 #cardstacks {
     background: #006600;
@@ -68,17 +68,17 @@
 }
 #victory_cards {
     background: #00f6f6;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 #treasure_cards {
     background: #f0f0f0;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 #curse_and_trash {
     background: #060606;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 #kingdom_cards {
@@ -88,17 +88,17 @@
 }
 #kingdom_row1 {
     background: #f0f000;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 #kingdom_row2 {
     background: #ff00f0;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 #kingdom_row3 {
     background: #00ffb0;
-    height: 80px;
+    height: 100px;
     border: 1px;
 }
 
@@ -106,7 +106,7 @@
 
 #middle {
     background: #0000ff;
-    height: 390px;
+    height: 330px;
 }
 #play_area {
     background: #aa5500;
@@ -115,7 +115,7 @@
 }
 #turn_info {
     background: #00aa55;
-    height: 50px;
+    height: 40px;
     text-align: center;
 }
 #turn_info p {
@@ -123,35 +123,35 @@
 }
 #cards_in_play {
     background: #aa0055;
-    height: 310px;
+    height: 250px;
 }
 #actions {
     background: #55aa00;
     float: left;
-    height: 340px;
+    height: 290px;
     width: 38%;
 }
 #treasures {
     background: #0055aa;
     float: left;
-    height: 340px;
+    height: 290px;
     width: 38%;
 }
 #bought {
     background: #0a5f33;
     float: left;
-    height: 340px;
+    height: 290px;
     width: 24%;
 }
 .in_play_title {
     text-align: center;
     font-weight: bold;
     background: #bb00ff;
-    height: 30px;
+    height: 20px;
 }
 .cards_in_play {
     overflow: auto;
-    height: 310px;
+    height: 270px;
 }
 
 
@@ -162,15 +162,15 @@
 }
 #other_player1 {
     background: #048910;
-    height: 130px;
+    height: 110px;
 }
 #other_player2 {
     background: #abcd00;
-    height: 130px;
+    height: 110px;
 }
 #other_player3 {
     background: #f6f6f6;
-    height: 130px;
+    height: 110px;
 }
 
 .playercardwrapper {
@@ -179,7 +179,7 @@
     margin-left: 125px;
 }
 .player_info {
-    height: 120px;
+    height: 100px;
     width: 110px;
     background: #ffffff;
     float: left;
