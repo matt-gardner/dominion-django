@@ -28,7 +28,7 @@
 
 .tallcardwrapper {
     height: 100px;
-    width: 80px;
+    width: 60px;
     background: #000000;
     display: inline-block;
     margin-left: auto;
@@ -38,10 +38,9 @@
 }
 
 .tallcard {
-    height: 90px;
-    width: 70px;
+    height: 100px;
+    width: 60px;
     background: #ffffff;
-    margin: 5px 5px 5px 5px;
     text-align: center;
     letter-spacing: normal;
 }
@@ -106,7 +105,7 @@
 
 #middle {
     background: #0000ff;
-    height: 330px;
+    height: 375px;
 }
 #play_area {
     background: #aa5500;
@@ -123,24 +122,24 @@
 }
 #cards_in_play {
     background: #aa0055;
-    height: 250px;
+    height: 295px;
 }
 #actions {
     background: #55aa00;
     float: left;
-    height: 290px;
+    height: 335px;
     width: 38%;
 }
 #treasures {
     background: #0055aa;
     float: left;
-    height: 290px;
+    height: 335px;
     width: 38%;
 }
 #bought {
     background: #0a5f33;
     float: left;
-    height: 290px;
+    height: 335px;
     width: 24%;
 }
 .in_play_title {
@@ -151,7 +150,7 @@
 }
 .cards_in_play {
     overflow: auto;
-    height: 270px;
+    height: 315px;
 }
 
 
@@ -162,24 +161,26 @@
 }
 #other_player1 {
     background: #048910;
-    height: 110px;
+    height: 125px;
 }
 #other_player2 {
     background: #abcd00;
-    height: 110px;
+    height: 125px;
 }
 #other_player3 {
     background: #f6f6f6;
-    height: 110px;
+    height: 125px;
 }
 
 .playercardwrapper {
-    letter-spacing: 8px;
+    letter-spacing: 33px;
     /* Not sure why this needs to be so big, but that's what works */
-    margin-left: 125px;
+    margin-left: 30px;
+    margin-top: 8px;
+    float: left;
 }
 .player_info {
-    height: 100px;
+    height: 115px;
     width: 110px;
     background: #ffffff;
     float: left;
@@ -191,7 +192,7 @@
 
 #bottom {
     background: #00ff00;
-    height: 170px;
+    height: 125px;
 }
 #deck {
     background: #ff0000;
@@ -200,12 +201,11 @@
     height: 100%;
 }
 #deckwrapper {
-    height: 120px;
     width: 80px;
     margin-left: 20px;
     margin-right: 20px;
-    margin-top: 25px;
-    margin-bottom: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 #deckwrapper .tallcardwrapper {
     margin-top: 0px;
@@ -220,8 +220,8 @@
 #discardwrapper {
     margin-left: 20px;
     margin-right: 20px;
-    margin-top: 25px;
-    margin-bottom: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 #discardwrapper .tallcardwrapper {
     margin-top: 0px;
@@ -231,12 +231,12 @@
     background: #ffff00;
     float: left;
     height: 100%;
-    width: 760px;
+    width: 860px;
     overflow: auto;
 }
 #handwrapper {
     height: 80px;
-    margin-top: 45px;
+    margin-top: 8px;
     margin-left: 40px;
     letter-spacing: 8px;
 }

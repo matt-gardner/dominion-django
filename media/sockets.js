@@ -49,8 +49,10 @@ function initialize_ui(message) {
     cardname_to_ui_id['Curse'] = '#Curse';
     kingdom_cards = new Array();
     var card_num = 1;
+    base_img = '/media/images/';
+    img_end = '-short.jpg';
     for (var i = 0; i < message.game_state.cardstacks.length; i++) {
-        cardname = message.game_state.cardstacks[i][0];
+        var cardname = message.game_state.cardstacks[i][0];
         if (cardname == "Colony") {
             $("#Colony").parent().show();
         }
@@ -62,6 +64,8 @@ function initialize_ui(message) {
             card_num++;
         }
         $(cardname_to_ui_id[cardname]+' .cardname').text(cardname);
+        new_src = base_img + cardname + img_end;
+        $(cardname_to_ui_id[cardname]+' img').attr("src", new_src);
     }
     $.fn.game_state.cardname_to_ui_id = cardname_to_ui_id;
 };
@@ -69,9 +73,9 @@ function initialize_ui(message) {
 function refresh_ui(message) {
     ui_mapping = $.fn.game_state.cardname_to_ui_id;
     for (var i = 0; i < message.game_state.cardstacks.length; i++) {
-        cardname = message.game_state.cardstacks[i][0];
+        var cardname = message.game_state.cardstacks[i][0];
         left = message.game_state.cardstacks[i][1];
-        $(ui_mapping[cardname]+' .left').text('Left: ' + left);
+        $(ui_mapping[cardname]+' .left').text(left);
     }
 };
 
