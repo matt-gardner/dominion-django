@@ -155,7 +155,7 @@
 
 
 #other_players {
-    background: #f32a4d;
+    background: #000000;
     width: 40%;
     float: left;
 }
@@ -172,7 +172,12 @@
     height: 125px;
 }
 
+.human, .connected {
+    font-size: 70%;
+}
+
 .playercardwrapper {
+    position: relative;
     letter-spacing: 33px;
     /* Not sure why this needs to be so big, but that's what works */
     margin-left: 30px;
@@ -186,6 +191,16 @@
     float: left;
     text-align: center;
     margin: 5px;
+}
+
+.count {
+    position: absolute;
+    top: 40px;
+    font-weight: bold;
+    color: #aa0000;
+    background: #000000;
+    background: rgba(0, 0, 0, .7);
+    padding: 10px;
 }
 
 /* Style rules for the bottom row: player hand and deck */
@@ -206,6 +221,7 @@
     margin-right: 20px;
     margin-top: 10px;
     margin-bottom: 10px;
+    position: relative;
 }
 #deckwrapper .tallcardwrapper {
     margin-top: 0px;
@@ -222,6 +238,7 @@
     margin-right: 20px;
     margin-top: 10px;
     margin-bottom: 10px;
+    position: relative;
 }
 #discardwrapper .tallcardwrapper {
     margin-top: 0px;
@@ -235,10 +252,11 @@
     overflow: auto;
 }
 #handwrapper {
-    height: 80px;
+    height: 100px;
     margin-top: 8px;
-    margin-left: 40px;
+    margin-left: 20px;
     letter-spacing: 8px;
+    text-align: left;
 }
 
 

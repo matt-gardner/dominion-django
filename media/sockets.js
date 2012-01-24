@@ -68,16 +68,69 @@ function initialize_ui(message) {
         $(cardname_to_ui_id[cardname]+' img').attr("src", new_src);
     }
     $.fn.game_state.cardname_to_ui_id = cardname_to_ui_id;
+
+    // Now the players, so we can update their info when we get it.
+    player_num_to_ui_id = new Array();
+    var player_num = 1;
+    for (i = 1; i < message.game_state.num_players+1; i++) {
+        if (i == $.fn.game_config.player_num) continue;
+        player_num_to_ui_id[i] = '#other_player' + player_num;
+        var $other_player = $(player_num_to_ui_id[i]);
+        $other_player.css('opacity', 1);
+        // Somewhat of an odd thing that I have to use brackets instead of
+        // a dot, even though it's all defined the same in python...
+        var player = message.game_state.players[i]
+        $other_player.find('.name').text(player.name);
+        if (player.human) {
+            $other_player.find('.human').text('Human')
+        }
+        else {
+            $other_player.find('.human').text('Computer')
+        }
+        if (player.connected) {
+            $other_player.find('.connected').text('Connected')
+        }
+        else {
+            $other_player.find('.connected').text('Not connected')
+        }
+        player_num++;
+    }
+    $.fn.game_state.player_num_to_ui_id = player_num_to_ui_id;
 };
 
 function refresh_ui(message) {
+    // Refresh card stacks
     ui_mapping = $.fn.game_state.cardname_to_ui_id;
     for (var i = 0; i < message.game_state.cardstacks.length; i++) {
         var cardname = message.game_state.cardstacks[i][0];
         left = message.game_state.cardstacks[i][1];
         $(ui_mapping[cardname]+' .left').text(left);
     }
+    // Refresh other player views
+    ui_mapping = $.fn.game_state.player_num_to_ui_id;
+    for (var i = 1; i < message.game_state.num_players+1; i++) {
+        if (i == $.fn.game_config.player_num) continue;
+        player = message.game_state.players[i];
+        $player = $(ui_mapping[i]);
+        $player.find('.hand').find('.count').text(player.cards_in_hand)
+        $player.find('.deck').find('.count').text(player.cards_in_deck)
+        $player.find('.discard').find('.count').text(player.cards_in_discard)
+    }
+    // Refresh your own views
+    me = message.game_state.players[$.fn.game_config.player_num];
+    $('#deck .count').text(me.cards_in_deck)
+    $('#discard .count').text(me.cards_in_discard)
+    for (i = 0; i < message.player_state.hand.length; i++) {
+        $('#handwrapper').append(create_card(message.player_state.hand[i]));
+    }
 };
+
+function create_card(card) {
+    html = '<div class="cardwrapper"><div class="card" id="card'+card[1]+'">';
+    html += '<img src="/media/images/' + card[0] + '-short.jpg" ';
+    html += 'width="108" height="90"></div></div>';
+    return html;
+}
 
 function pick_player(num) {
     window.location = '/game/' + $.fn.game_config.game + '/player/' + num
@@ -101,4 +154,7 @@ $(document).ready(function() {
     $.fn.game_state = function() {};
     $("#Colony").parent().hide();
     $("#Platinum").parent().hide();
+    $('#other_player1').css('opacity', .25);
+    $('#other_player2').css('opacity', .25);
+    $('#other_player3').css('opacity', .25);
 });

@@ -108,6 +108,7 @@ class GameState(dict):
     def __init__(self, game_id):
         game = Game.objects.select_related().get(pk=game_id)
         self['players'] = dict()
+        self['num_players'] = game.num_players
         p = self['players']
         for player in game.player_set.all():
             num = player.player_num
@@ -144,6 +145,7 @@ class PlayerState(dict):
         player = get_player(game_id, player_num)
         hand = player.get_hand()
         self['hand'] = [(c.cardname, c._card_num) for c in hand]
+        # Why did I put this line in?
         self['player_num'] = player_num
 
 def main():
