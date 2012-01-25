@@ -121,14 +121,25 @@ function refresh_ui(message) {
     $('#deck .count').text(me.cards_in_deck)
     $('#discard .count').text(me.cards_in_discard)
     for (i = 0; i < message.player_state.hand.length; i++) {
-        $('#handwrapper').append(create_card(message.player_state.hand[i]));
+        $(create_card(message.player_state.hand[i]))
+            .appendTo('#handsortable');
     }
+    $('#handsortable').sortable({
+        stop: function(event, ui) {
+            if ($.fn.game_state.dropped) {
+                $.fn.game_state.dropped = false;
+                return false;
+            }
+        },
+        revert: true});
 };
 
 function create_card(card) {
-    html = '<div class="cardwrapper"><div class="card" id="card'+card[1]+'">';
+    // The <li> is so that it works with sortable.  I wish I didn't have to use
+    // it, though, so I could stay consistent with divs...  Oh well.
+    html = '<li class="cardwrapper"><div class="card" id="card'+card[1]+'">';
     html += '<img src="/media/images/' + card[0] + '-short.jpg" ';
-    html += 'width="108" height="90"></div></div>';
+    html += 'width="108" height="90"></div></li>';
     return html;
 }
 
@@ -157,4 +168,17 @@ $(document).ready(function() {
     $('#other_player1').css('opacity', .25);
     $('#other_player2').css('opacity', .25);
     $('#other_player3').css('opacity', .25);
+    $('#cardstacks .cardwrapper').draggable({revert: true, helper: "clone"});
+    $.fn.game_state.dropped = false;
+    $.fn.game_state.draggable_sibling = "";
+    $('#cards_bought').droppable({
+        drop: function(event, ui) {
+            ui.draggable.appendTo($(this));
+            ui.draggable.draggable("option", "revert", false);
+            ui.draggable.removeClass('ui-sortable-helper');
+            $('#handsortable .ui-sortable-placeholder').remove()
+            $('#handsortable').sortable("option", "revert", false)
+            $.fn.game_state.dropped = true;
+        },
+        hoverClass: 'drop_hover'});
 });
