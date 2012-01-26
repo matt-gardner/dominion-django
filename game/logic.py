@@ -121,6 +121,7 @@ class GameState(dict):
             p[num]['cards_in_deck'] = player.num_cards_in_deck()
         self['current_player'] = game.current_player
         current_player = game.player_set.get(player_num=game.current_player)
+        self['current_player_name'] = current_player.name
         self['current_player_actions'] = current_player.num_actions
         self['current_player_buys'] = current_player.num_buys
         self['current_player_coins'] = current_player.coins
