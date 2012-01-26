@@ -5,6 +5,8 @@
 
     <link rel="stylesheet" title="default" href="/media/style.css"
         type="text/css" />
+    <link rel="stylesheet" href="/media/jquery-ui-1.8.17.custom.css"
+        title="default" type="text/css" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"
         type="text/javascript"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js" type="text/javascript"></script>
@@ -35,6 +37,7 @@
                   <img src="/media/images/Estate-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Estate</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -42,6 +45,7 @@
                   <img src="/media/images/Duchy-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Duchy</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -49,6 +53,7 @@
                   <img src="/media/images/Province-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Province</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -56,6 +61,7 @@
                   <img src="/media/images/Colony-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Colony</span>
                 </div>
               </div>
             </div>
@@ -65,6 +71,7 @@
                   <img src="/media/images/Copper-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Copper</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -72,6 +79,7 @@
                   <img src="/media/images/Silver-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Silver</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -79,6 +87,7 @@
                   <img src="/media/images/Gold-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Gold</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -86,6 +95,7 @@
                   <img src="/media/images/Platinum-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Platinum</span>
                 </div>
               </div>
             </div>
@@ -95,6 +105,7 @@
                   <img src="/media/images/Curse-short.jpg" width="108"
                   height="90">
                   <span class="left"></span>
+                  <span class="cardname">Curse</span>
                 </div>
               </div>
               <div class="cardwrapper">
@@ -111,18 +122,21 @@
                 <div class="card" id="kcard1">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard2">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard3">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
             </div>
@@ -131,24 +145,28 @@
                 <div class="card" id="kcard4">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard5">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard6">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard7">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
             </div>
@@ -157,18 +175,21 @@
                 <div class="card" id="kcard8">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard9">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
               <div class="cardwrapper">
                 <div class="card" id="kcard10">
                   <img src="" width="108" height="90">
                   <span class="left"></span>
+                  <span class="cardname"></span>
                 </div>
               </div>
             </div>
@@ -178,7 +199,7 @@
       <div id="middle">
         <div id="play_area">
           <div id="turn_info">
-            <p>Matt's turn</p>
+            <p><span id="player_name">Matt</span>'s turn</p>
             <p>
             Actions: <span id="num_actions">1</span>
             Buys: <span id="num_buys">1</span>
@@ -325,6 +346,11 @@
             <ul id="handsortable">
             </ul>
           </div>
+        </div>
+        <div id="buttons">
+          <ul id="buttonlist">
+            <li><button type="button" id="endturn">End turn</button></li>
+          </ul>
         </div>
       </div>
     </div>
