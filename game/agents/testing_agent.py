@@ -61,6 +61,8 @@ class Agent(object):
             # TODO: these messages are ugly; clean up the protocol a bit
             if 'player_state' in message:
                 self.player_state = message['player_state']
+            if 'game_state' in message:
+                self.game_state = message['game_state']
             if message['game_state']['current_player'] == self.player:
                 try:
                     old_player_state = self.player_state
