@@ -26,6 +26,10 @@
     letter-spacing: normal;
 }
 
+.cardname {
+    display: hidden;
+}
+
 .tallcardwrapper {
     height: 100px;
     width: 60px;
@@ -242,7 +246,7 @@
     background: #ffff00;
     float: left;
     height: 100%;
-    width: 860px;
+    width: 760px;
     overflow-x: auto;
     overflow-y: none;
 }
@@ -253,9 +257,23 @@
     letter-spacing: 8px;
     text-align: left;
 }
+#buttons {
+    width: 100px;
+    height: 100%;
+    float: left;
+}
+#buttons ul {
+    list-style-type: none;
+    padding: 0;
+    margin-left: 0;
+}
 .drop_hover {
     border-style: solid;
     border-width: 5px;
+}
+.dialog_cards {
+    height: 100px;
+    width: 300px;
 }
 
 
