@@ -3,15 +3,20 @@ function on_message(message) {
         // Heartbeat message; move along
         return;
     }
-    if ('connected' in message) {
+    else if ('attack_response' in message) {
+        if (message.attacking_player == $.fn.game_config.player_num) {
+            send(message);
+        }
+    }
+    else if ('connected' in message) {
         initialize_ui(message);
         refresh_ui(message);
     }
-    if ('announcement' in message) {
+    else if ('announcement' in message) {
         // Not sure what to do here yet - this is for things like, "another
         // player connected"
     }
-    if ('available' in message) {
+    else if ('available' in message) {
         if ($.fn.game_config.player_num == -1) {
             $("#main p").text("Connected! Pick which player to be:");
             var i = 0;
@@ -27,6 +32,18 @@ function on_message(message) {
         } else {
             send({'player': $.fn.game_config.player_num});
         }
+    }
+    else if ('card_bought' in message) {
+        refresh_ui(message);
+    }
+    else if ('newturn' in message) {
+        refresh_ui(message);
+    }
+    else if ('action_finished' in message) {
+        refresh_ui(message);
+    }
+    else if ('user_action' in message) {
+        respond_to_action(message);
     }
 };
 
@@ -116,30 +133,43 @@ function refresh_ui(message) {
         $player.find('.deck').find('.count').text(player.cards_in_deck)
         $player.find('.discard').find('.count').text(player.cards_in_discard)
     }
+    $('#player_name').text(message.game_state.current_player_name);
+    $('#num_actions').text(message.game_state.current_player_actions);
+    $('#num_actions').text(message.game_state.current_player_actions);
+    $('#num_coins').text(message.game_state.current_player_coins);
+    $('#num_buys').text(message.game_state.current_player_buys);
     // Refresh your own views
     me = message.game_state.players[$.fn.game_config.player_num];
     $('#deck .count').text(me.cards_in_deck)
     $('#discard .count').text(me.cards_in_discard)
-    for (i = 0; i < message.player_state.hand.length; i++) {
-        $(create_card(message.player_state.hand[i]))
-            .appendTo('#handsortable');
+    if (message.player_state) {
+        $('#handsortable').empty();
+        for (i = 0; i < message.player_state.hand.length; i++) {
+            $(create_card(message.player_state.hand[i]))
+                .appendTo('#handsortable');
+        }
+        $('#handsortable').sortable({
+            stop: function(event, ui) {
+                if ($.fn.game_state.dropped) {
+                    $.fn.game_state.dropped = false;
+                    return false;
+                }
+            },
+            revert: true
+        });
     }
-    $('#handsortable').sortable({
-        stop: function(event, ui) {
-            if ($.fn.game_state.dropped) {
-                $.fn.game_state.dropped = false;
-                return false;
-            }
-        },
-        revert: true});
+    // For some reason I'm getting the droppable.drop method called twice, and
+    // it's breaking things...
+    $.fn.game_state.bought = false;
 };
 
 function create_card(card) {
     // The <li> is so that it works with sortable.  I wish I didn't have to use
     // it, though, so I could stay consistent with divs...  Oh well.
-    html = '<li class="cardwrapper"><div class="card" id="card'+card[1]+'">';
+    html = '<li class="cardwrapper"><div class="card" id="'+card[1]+'">';
     html += '<img src="/media/images/' + card[0] + '-short.jpg" ';
-    html += 'width="108" height="90"></div></li>';
+    html += 'width="108" height="90">';
+    html += '<span class="cardname">' + card[0] + '</span></div></li>';
     return html;
 }
 
@@ -150,6 +180,42 @@ function pick_player(num) {
 function esc(msg) {
     return String(msg).replace(/</g, '&lt;').replace(/>/g, '&gt;');
 };
+
+function respond_to_action(message) {
+    if (message.user_action == 'discard_to_three') {
+        text_to_show = 'Militia! Discard to three cards.';
+        text_to_show += '  Drag the cards into this dialog.';
+    }
+    $dialog = $('<div><div class="text"></div><div class="dialog_cards">'
+            +'</div></div>');
+    $dialog.find('.dialog_cards').droppable({
+        drop: function(event, ui) {
+            ui.draggable.appendTo($(this));
+            ui.draggable.draggable("option", "revert", false);
+            ui.draggable.removeClass('ui-sortable-helper');
+            $('#handsortable .ui-sortable-placeholder').remove();
+            $('#handsortable').sortable("option", "revert", false);
+            $.fn.game_state.dropped = true;
+        },
+        hoverClass: 'drop_hover'
+    });
+    response = {
+        'responding_player': $.fn.game_config.player_num,
+        'attacking_player': message.attacking_player,
+        'attack_response': 'pues!'
+    };
+    $dialog.find('.text').html(text_to_show);
+    $dialog.dialog({
+        close: function(event, ui) {
+            to_discard = [];
+            $(this).find('.card').each(function() {
+                to_discard.push($(this).attr("id"));
+            });
+            response['discarded'] = to_discard;
+            send(response);
+        }
+    });
+}
 
 $(document).ready(function() {
     $.fn.socket_config.socket = new io.Socket(null,
@@ -168,7 +234,11 @@ $(document).ready(function() {
     $('#other_player1').css('opacity', .25);
     $('#other_player2').css('opacity', .25);
     $('#other_player3').css('opacity', .25);
-    $('#cardstacks .cardwrapper').draggable({revert: true, helper: "clone"});
+    $('.cards_in_play').sortable({revert: true});
+    $('#cardstacks .cardwrapper').draggable({
+        connectToSortable: '.cards_in_play',
+        revert: "invalid",
+        helper: "clone"});
     $.fn.game_state.dropped = false;
     $.fn.game_state.draggable_sibling = "";
     $('#cards_bought').droppable({
@@ -176,9 +246,32 @@ $(document).ready(function() {
             ui.draggable.appendTo($(this));
             ui.draggable.draggable("option", "revert", false);
             ui.draggable.removeClass('ui-sortable-helper');
-            $('#handsortable .ui-sortable-placeholder').remove()
-            $('#handsortable').sortable("option", "revert", false)
+            $('#handsortable .ui-sortable-placeholder').remove();
+            $('#handsortable').sortable("option", "revert", false);
             $.fn.game_state.dropped = true;
+            if (!$.fn.game_state.bought) {
+                send({'buycard': ui.draggable.find('.cardname').text()});
+            }
+            $.fn.game_state.bought = true;
         },
-        hoverClass: 'drop_hover'});
+        hoverClass: 'drop_hover'}
+    );
+    $('#actions_played').droppable({
+        drop: function(event, ui) {
+            ui.draggable.appendTo($(this));
+            ui.draggable.draggable("option", "revert", false);
+            ui.draggable.removeClass('ui-sortable-helper');
+            $('#handsortable .ui-sortable-placeholder').remove();
+            $('#handsortable').sortable("option", "revert", false);
+            $.fn.game_state.dropped = true;
+            send({'playaction': ui.draggable.find('.card').attr("id")});
+        },
+        hoverClass: 'drop_hover'}
+    );
+    $('#endturn').click(function(){
+        send({'endturn': 'endturn'});
+        // TODO: put this in a better spot; we need to put "cards in play" into
+        // the messages the server sends first
+        $('.cards_in_play').empty();
+    });
 });
