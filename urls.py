@@ -8,6 +8,7 @@ player = '(?P<player>[^/]+)'
 urlpatterns = patterns('',
     (r'^$', 'game.views.game.main'),
     (r'^new-game/$', 'game.views.game.new_game'),
+    (r'^create-new-game/$', 'game.views.game.create_new_game'),
     (r'^game/' + game + '$', 'game.views.game.pick_player'),
     (r'^game/' + game + '/player/' + player + '$', 'game.views.game.play'),
     (r'^media/(?P<path>.*)$', 'django.views.static.serve',

@@ -3,7 +3,7 @@
 all_cards = set(('Copper', 'Silver', 'Gold', 'Estate', 'Duchy', 'Province',
         'Curse', 'Gardens', 'Adventurer', 'Bureaucrat', 'Cellar', 'Chancellor',
         'Chapel', 'CouncilRoom', 'Feast', 'Festival', 'Laboratory', 'Library',
-        'Market', 'Militia', 'Mine', 'Moat', 'MoneyLender', 'Remodel',
+        'Market', 'Militia', 'Mine', 'Moat', 'Moneylender', 'Remodel',
         'Smithy', 'Spy', 'Thief', 'ThroneRoom', 'Village', 'Witch',
         'Woodcutter', 'Workshop'))
 
@@ -20,7 +20,7 @@ class RandomCardSet(BaseCardSet):
         self.name = 'Random'
         from random import Random
         r = Random()
-        cards_left = all_cards - self.cards
+        cards_left = list(all_cards - self.cards)
         for i in range(10):
             card = r.choice(cards_left)
             cards_left.remove(card)
@@ -42,7 +42,7 @@ class BigMoneyCardSet(BaseCardSet):
         self.name = 'Big Money'
         cards = set(['Adventurer', 'Bureaucrat', 'Chancellor', 'Chapel',
                 'Feast', 'Laboratory', 'Market', 'Mine', 'Moneylender',
-                'Throne Room'])
+                'ThroneRoom'])
         self.cards.update(cards)
 
 
@@ -50,7 +50,7 @@ class InteractionCardSet(BaseCardSet):
     def __init__(self):
         super(InteractionCardSet, self).__init__()
         self.name = 'Interaction'
-        cards = set(['Bureaucrat', 'Chancellor', 'Council Room', 'Festival',
+        cards = set(['Bureaucrat', 'Chancellor', 'CouncilRoom', 'Festival',
                 'Library', 'Militia', 'Moat', 'Spy', 'Thief', 'Village'])
         self.cards.update(cards)
 
@@ -69,8 +69,17 @@ class VillageSquareCardSet(BaseCardSet):
         super(VillageSquareCardSet, self).__init__()
         self.name = 'Village Square'
         cards = set(['Bureaucrat', 'Cellar', 'Festival', 'Library', 'Market',
-                'Remodel', 'Smithy', 'Throne Room', 'Village', 'Woodcutter'])
+                'Remodel', 'Smithy', 'ThroneRoom', 'Village', 'Woodcutter'])
         self.cards.update(cards)
 
+
+from_name = {
+        'Random': RandomCardSet,
+        'First Game': FirstGameCardSet,
+        'Big Money': BigMoneyCardSet,
+        'Interaction': InteractionCardSet,
+        'Size Distortion': SizeDistortionCardSet,
+        'Village Square': VillageSquareCardSet
+        }
 
 # vim: et sw=4 sts=4

@@ -409,11 +409,11 @@ class Moat(ActionCard):
         player.draw_card()
 
 
-class MoneyLender(ActionCard):
+class Moneylender(ActionCard):
     def __init__(self, card_num):
-        super(MoneyLender, self).__init__(card_num)
+        super(Moneylender, self).__init__(card_num)
         self._cost = 4
-        self.cardname = 'MoneyLender'
+        self.cardname = 'Moneylender'
 
     def play_action(self, player, socket):
         # Choose copper card to trash
@@ -636,7 +636,7 @@ card_from_name = {
         'Militia': Militia,
         'Mine': Mine,
         'Moat': Moat,
-        'MoneyLender': MoneyLender,
+        'Moneylender': Moneylender,
         'Remodel': Remodel,
         'Smithy': Smithy,
         'Spy': Spy,
