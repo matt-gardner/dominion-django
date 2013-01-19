@@ -10,10 +10,12 @@ LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
-MEDIA_ROOT = 'media'
-MEDIA_URL = ''
+STATIC_ROOT = 'media'
+STATIC_URL = 'media'
 ADMIN_MEDIA_PREFIX = '/media/'
 SECRET_KEY = 'aysxjoasdfjre234n#0vhu3=%(49r_3xri@hv3y8tk_2s4jnhowp-9u7eo+tl'
+
+SOCKETIO_PORT = 9000
 
 DATABASES = {
     'default': {
@@ -53,6 +55,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'dominion.game',
+    'django_socketio',
 )
 
 

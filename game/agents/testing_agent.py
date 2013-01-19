@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, httplib
 
 print os.getcwd()+'/..'
 sys.path.append(os.getcwd()+'/..')
 os.environ['DJANGO_SETTINGS_MODULE'] = 'dominion.settings'
 
 import websocket
-import thread
-import time
-import asyncore
 from random import Random
 from dominion.game.models import get_card_from_name
 from dominion.game.socketio_base import get_message
@@ -32,12 +29,19 @@ class Agent(object):
         self.r = Random()
 
     def connect(self, url):
-        ws = websocket.WebSocket(url,
-                onopen=self.on_open,
-                onmessage=self.on_message,
-                onclose=self.on_close)
+        conn  = httplib.HTTPConnection('localhost:9000')
+        conn.request('POST','/socket.io/1/')
+        resp  = conn.getresponse()
+        resp_text = resp.read()
+        print resp_text
+        hskey = resp_text.split(':')[0]
+        websocket.enableTrace(True)
+        ws = websocket.WebSocketApp(url + 'websocket/' + hskey,
+                on_message=self.on_message,
+                on_close=self.on_close)
+        ws.on_open = self.on_open
         try:
-            asyncore.loop()
+            ws.run_forever()
         except KeyboardInterrupt:
             ws.close()
 
@@ -98,7 +102,7 @@ class Agent(object):
 
     def on_open(self, ws):
         print 'Connection opened'
-        ws.send({'game': 1})
+        ws.send({'game': 2})
 
     def take_turn(self, ws, player_state, game_state):
         # We save these here for future use, because this code has to be event
@@ -280,7 +284,7 @@ if __name__ == "__main__":
     import sys
     player = 0
     a = Agent(player)
-    a.connect("ws://localhost:9000/socket.io/websocket")
+    a.connect("ws://localhost:9000/socket.io/1/")
 
 
 # vim: et sw=4 sts=4

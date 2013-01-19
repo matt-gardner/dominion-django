@@ -31,6 +31,7 @@ def socketio(request):
     player = None
     while True:
         message = socketio.recv()
+        print message
 
         if not socketio.connected():
             if player:
@@ -43,7 +44,6 @@ def socketio(request):
             continue
         if len(message) == 1:
             message = message[0]
-            print message
             start = datetime.now()
         else:
             print "ERROR: Message wasn't a list of 1 item: ", message
