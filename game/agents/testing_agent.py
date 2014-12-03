@@ -11,6 +11,7 @@ import thread
 import time
 import asyncore
 from random import Random
+from optparse import OptionParser
 from dominion.game.models import get_card_from_name
 from dominion.game.socketio_base import get_message
 
@@ -27,7 +28,7 @@ def get_available_cards(state, max_cost=50):
 
 class Agent(object):
     def __init__(self, player):
-        self.available_player = player
+        self.player_to_pick = player
         self.player = None
         self.r = Random()
 
@@ -52,7 +53,14 @@ class Agent(object):
         print 'Message:', message
         print
         if 'available' in message:
-            self.player = message['available'][self.available_player]
+            if self.player_to_pick == -1:
+                self.player = message['available'][0]
+            else:
+                if self.player_to_pick in message['available']:
+                    self.player = self.player_to_pick
+                else:
+                    print "Requested player number is not available"
+                    ws.close()
             ws.send({'player': self.player})
         elif 'game_over' in message:
             print 'Game over, closing socket'
@@ -219,6 +227,12 @@ class Agent(object):
                 self.player_state['hand'].remove(to_remove)
                 message['trashed'] = trashed._card_num
             ws.send(message)
+        elif action == 'trash_copper':
+            copper = [c for c in cards_in_hand if c.cardname == 'Copper']
+            if copper:
+                message['trashed'] = copper[0]._card_num
+            else:
+                message['trashed'] = 'None'
         elif action == 'pick_action':
             actions = [c for c in cards_in_hand if c._is_action]
             message['gained'] = self.r.choice(actions).card_num
@@ -263,8 +277,9 @@ class Agent(object):
             ws.send(message)
         elif action == 'stealing':
             message['trash'] = received_message['cards'][0][1]
+            message['steal'] = received_message['cards'][0][1]
             ws.send(message)
-        elif action == 'bureaucrat_attacking':
+        elif action == 'bureaucrat':
             victory_cards = [c for c in cards_in_hand if c._is_victory]
             if not victory_cards:
                 message['victory_card'] = -1
@@ -278,8 +293,15 @@ class Agent(object):
 
 if __name__ == "__main__":
     import sys
-    player = 0
-    a = Agent(player)
+    parser = OptionParser()
+    parser.add_option('-p', '--player',
+            dest='player',
+            default=-1,
+            help='Player number to be.  If that number is not available, we '
+            'quit.  If -1, pick the first available player number.',
+            )
+    opts, args = parser.parse_args()
+    a = Agent(int(opts.player))
     a.connect("ws://localhost:9000/socket.io/websocket")
 
 

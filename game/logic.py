@@ -148,6 +148,8 @@ class PlayerState(dict):
         self['hand'] = [(c.cardname, c._card_num) for c in hand]
         # Why did I put this line in?
         self['player_num'] = player_num
+        # DEBUGGING ONLY! Way too verbose if on all the time
+        player.print_deck()
 
 def main():
     pass

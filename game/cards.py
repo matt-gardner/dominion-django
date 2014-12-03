@@ -462,8 +462,8 @@ class Spy(ActionCard):
         self.cardname = 'Spy'
 
     def play_action(self, player, socket):
-        self.draw_card()
-        self.num_actions += 1
+        player.draw_card()
+        player.num_actions += 1
         # Attack other players, choose what to do
         response_needed = set()
         for other in player.game.get_other_players():
@@ -481,7 +481,9 @@ class Spy(ActionCard):
                 pass
             response_needed.remove(message['responding_player'])
         for p in to_spy_on:
-            card = p.deck.cards_in_deck.split()[0]
+            card = p.deck.top_card()
+            if card == -1:
+                continue
             socket.send({'user_action': 'spying', 'player': p.player_num,
                     'cardname': p.card_from_card_num(card).cardname})
             message = get_message(socket)
@@ -507,7 +509,7 @@ class Thief(ActionCard):
             response_needed.add(other.player_num)
         socket.broadcast({'user_action': 'thief',
                 'attacking_player': player.player_num})
-        to_steal_from = set([player])
+        to_steal_from = set()
         while response_needed:
             message = get_message(socket)
             player_num = message['responding_player']
@@ -521,7 +523,7 @@ class Thief(ActionCard):
             # TODO: Not really safe yet if player has 0 or 1 cards in deck
             cards = [p.card_from_card_num(c)
                     for c in p.deck.cards_in_deck.split()[0:2]]
-            p.deck.cards_in_deck = ' '.join(deck[0:2])
+            p.deck.cards_in_deck = ' '.join(p.deck.cards_in_deck[2:])
             discard = p.deck.cards_in_discard.split()
             treasure = [c for c in cards if c._is_treasure]
             not_treasure = [c for c in cards if not c._is_treasure]
@@ -534,6 +536,8 @@ class Thief(ActionCard):
             for c in treasure:
                 if not message.get('trash', -1) == c._card_num:
                     discard.append(c._card_num)
+                if message.get('steal', -1) == c._card_num:
+                    player.gain_card(c.cardname, from_stack=False)
             p.deck.cards_in_discard = ' '.join(discard)
             p.deck.save()
 

@@ -117,6 +117,7 @@ class Player(models.Model):
                 self.deck.cards.get(card_num=card_num).cardname, card_num)
 
     def draw_card(self):
+        prev_cards = self.deck.cards_in_deck
         card = self.card_from_card_num(self.deck.draw_card_to_hand())
         self.coins += card.coins()
         self.save()
@@ -172,13 +173,14 @@ class Player(models.Model):
         cardstack.save()
         self.deck.add_card(cardname)
 
-    def gain_card(self, cardname):
+    def gain_card(self, cardname, from_stack=True):
         cardstack = self.game.cardset.cardstack_set.get(cardname=cardname)
-        if cardstack.num_left == 0:
+        if from_stack and cardstack.num_left == 0:
             raise IllegalActionError("Cannot buy a card from an empty stack")
         card = get_card_from_name(cardname)
-        cardstack.num_left -= 1
-        cardstack.save()
+        if from_stack:
+            cardstack.num_left -= 1
+            cardstack.save()
         self.deck.add_card(cardname)
 
     def gain_card_to_hand(self, cardname):
@@ -199,6 +201,20 @@ class Player(models.Model):
             self.draw_card()
         self.turn_state = self.TURN_STATES[0][0]
         self.save()
+
+    def print_deck(self):
+        print 'Printing deck for', self.name
+        print 'Cards in hand:'
+        for c in self.deck.cards_in_hand.split():
+            print '  %s: %s' % (c, self.card_from_card_num(c).cardname)
+        print 'Cards in deck:'
+        for c in self.deck.cards_in_deck.split():
+            print '  %s: %s' % (c, self.card_from_card_num(c).cardname)
+        print 'Cards in discard:'
+        for c in self.deck.cards_in_discard.split():
+            print '  %s: %s' % (c, self.card_from_card_num(c).cardname)
+        print
+
 
 
 class Deck(models.Model):
@@ -252,6 +268,13 @@ class Deck(models.Model):
         self.cards_in_hand = ' '.join(hand)
         self.last_card_num += 1
         self.save()
+
+    def top_card(self):
+        if len(self.cards_in_deck) == 0:
+            self.shuffle()
+        if len(self.cards_in_deck) == 0:
+            return -1
+        return self.cards_in_deck.split()[0]
 
     def shuffle(self):
         """Takes cards_in_discard, shuffles them, and writes to cards_in_deck.

@@ -54,6 +54,7 @@ def leave_transaction_management(exc_type=None, exc_value=None, tb=None,
     if exc_type:
         import traceback
         print '\nTraceback (from the actual error):'
+        print exc_type
         traceback.print_tb(tb)
         print '\nNow for the useless TransactionManagementError:\n'
     if using is None:
