@@ -13,8 +13,5 @@ urlpatterns = patterns('',
     (r'^game/' + game + '/player/' + player + '$', 'game.views.game.play'),
     (r'^media/(?P<path>.*)$', 'django.views.static.serve',
                 {'document_root': os.path.join(settings.BASE_PATH, 'media')}),
-)
-
-urlpatterns += patterns('',
-    (r'^socket\.io', 'game.views.socketio.socketio'),
+    url("", include('django_socketio.urls')),
 )

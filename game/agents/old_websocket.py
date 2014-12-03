@@ -194,12 +194,14 @@ class _Dispatcher(asyncore.dispatcher):
         if self.ws.onmessage:
             message = decode_socketio_message(frame[1:-1])
             if isinstance(message, str) and message.startswith(HEARTBEAT_FRAME):
+                print 'Got a heartbeat:', message
                 self.ws.send(message)
             else:
                 self.ws.onmessage(self.ws, message)
         # TODO: else raise WebSocketError('No message handler defined')
 
     def _handle_header(self, header):
+        print header
         assert header[-4:] == '\r\n\r\n'
         start_line, fields = _parse_http_header(header)
         if start_line != 'HTTP/1.1 101 Web Socket Protocol Handshake' or \
@@ -273,6 +275,7 @@ def encode_for_socketio(message):
     return MSG_FRAME + str(len(encoded_msg)) + MSG_FRAME + encoded_msg
 
 def decode_socketio_message(message):
+    print message
     if message[0:3] != MSG_FRAME:
         raise ValueError("Unsupported frame type: " + message)
     _, size, data = message.split(MSG_FRAME, 2)
